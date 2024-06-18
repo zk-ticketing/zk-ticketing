@@ -1,0 +1,18 @@
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: zk-ticketing-app
+build:
+  artifacts:
+    - image: frontend
+      context: frontend
+      docker:
+        dockerfile: Dockerfile
+    - image: server
+      context: server
+      docker:
+        dockerfile: Dockerfile
+manifests:
+  rawYaml:
+    - infra/k8s/frontend.yaml
+    - infra/k8s/server.yaml
