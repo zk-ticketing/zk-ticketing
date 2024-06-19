@@ -92,3 +92,14 @@ func (s *DefaultAPIService) UsersRequestVerificationCodePost(ctx context.Context
 
 	return Response(http.StatusNotImplemented, nil), errors.New("UsersRequestVerificationCodePost method not implemented")
 }
+
+// UsersUpdatePut - Update user details
+func (s *DefaultAPIService) UsersUpdatePut(ctx context.Context, userUpdate UserUpdate) (ImplResponse, error) {
+	// TODO - update UsersUpdatePut with the required logic for this service method.
+	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, User{}) or use other options such as http.Ok ...
+	// return Response(200, User{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("UsersUpdatePut method not implemented")
+}

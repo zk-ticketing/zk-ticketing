@@ -66,11 +66,11 @@ func (s *APIService) UsersLoginPost(ctx context.Context, userLogin openapi.UserL
 	}
 	logger = logger.With().Str("email", email.Address).Logger()
 
-	u, err := s.dbClient.Users.GetUserByEmail(ctx, email.Address)
+	user, err := s.dbClient.Users.GetUserByEmail(ctx, email.Address)
 	if err != nil {
 		if err == pgx.ErrNoRows {
 			logger.Info().Msg("User not found, creating new user")
-			u, err = s.dbClient.Users.CreateUser(ctx, users.CreateUserParams{
+			user, err = s.dbClient.Users.CreateUser(ctx, users.CreateUserParams{
 				ID:    uuid.NewString(),
 				Email: email.Address,
 			})
@@ -83,7 +83,7 @@ func (s *APIService) UsersLoginPost(ctx context.Context, userLogin openapi.UserL
 	}
 
 	// Generate JWT
-	token, err := s.jwtService.GenerateJWT(u.ID, u.Email)
+	token, err := s.jwtService.GenerateJWT(user.ID, user.Email)
 	if err != nil {
 		logger.Err(err).Msg("Failed to generate JWT")
 		return openapi.Response(http.StatusInternalServerError, nil), err
@@ -95,16 +95,18 @@ func (s *APIService) UsersLoginPost(ctx context.Context, userLogin openapi.UserL
 
 // UsersMeGet - Get user details
 func (s *APIService) UsersMeGet(ctx context.Context) (openapi.ImplResponse, error) {
+	logger := log.Ctx(ctx).With().Str("op", "UsersMeGet").Logger()
 	userEmail := util.GetUserEmailFromContext(ctx)
 	userID := util.GetUserIDFromContext(ctx)
-	log.Info().Msgf("userID: %v, userEmail: %v", userID, userEmail)
 	if userID == "" || userEmail == "" {
 		return openapi.Response(http.StatusUnauthorized, nil), nil
 	}
+	logger = logger.With().Str("email", userEmail).Str("uid", userID).Logger()
 
 	user, err := s.dbClient.Users.GetUserByID(ctx, userID)
 	if err != nil {
 		if err == pgx.ErrNoRows {
+			logger.Err(err).Msg("User not found")
 			return openapi.Response(http.StatusNotFound, nil), nil
 		}
 		return openapi.Response(http.StatusInternalServerError, nil), err
@@ -115,5 +117,62 @@ func (s *APIService) UsersMeGet(ctx context.Context) (openapi.ImplResponse, erro
 
 // UsersRequestVerificationCodePost - Request an email verification code
 func (s *APIService) UsersRequestVerificationCodePost(ctx context.Context, userEmailVerificationRequest openapi.UserEmailVerificationRequest) (openapi.ImplResponse, error) {
-	return openapi.Response(http.StatusNotImplemented, nil), nil
+	logger := log.Ctx(ctx).With().Str("op", "UsersRequestVerificationCodePost").Logger()
+
+	email, err := mail.ParseAddress(userEmailVerificationRequest.Email)
+	if err != nil {
+		return openapi.Response(http.StatusBadRequest, "Invalid Email"), nil
+	}
+	logger = logger.With().Str("email", email.Address).Logger()
+
+	// TODO: rate limit email and source ip
+
+	logger.Info().Msg("Requesting verification code")
+	// TODO: send email verification code
+
+	return openapi.Response(http.StatusOK, nil), nil
+}
+
+// UsersUpdatePut - Update user details
+func (s *APIService) UsersUpdatePut(ctx context.Context, userUpdate openapi.UserUpdate) (openapi.ImplResponse, error) {
+	logger := log.Ctx(ctx).With().Str("op", "UsersUpdatePut").Logger()
+	userEmail := util.GetUserEmailFromContext(ctx)
+	userID := util.GetUserIDFromContext(ctx)
+	if userID == "" || userEmail == "" {
+		return openapi.Response(http.StatusUnauthorized, nil), nil
+	}
+	logger = logger.With().Str("email", userEmail).Str("uid", userID).Logger()
+
+	encryptedIdentitySecret := userUpdate.EncryptedIdentitySecret
+	encryptedInternalNullifier := userUpdate.EncryptedInternalNullifier
+	identityCommitment := userUpdate.IdentityCommitment
+	// TODO: validate input
+
+	// get existing user info, fail update request if user already has these fields set
+	user, err := s.dbClient.Users.GetUserByID(ctx, userID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			logger.Err(err).Msg("User not found")
+			return openapi.Response(http.StatusNotFound, nil), nil
+		}
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+	if user.EncryptedIdentitySecret != "" && user.EncryptedInternalNullifier != "" && user.IdentityCommitment != "" {
+		errMsg := "Identity fields have already been set, cannot update again"
+		logger.Info().Msg(errMsg)
+		return openapi.Response(http.StatusBadRequest, errMsg), nil
+	}
+
+	// update user info in database
+	user, err = s.dbClient.Users.UpdateUser(ctx, users.UpdateUserParams{
+		ID:                         userID,
+		EncryptedIdentitySecret:    encryptedIdentitySecret,
+		EncryptedInternalNullifier: encryptedInternalNullifier,
+		IdentityCommitment:         identityCommitment,
+	})
+	if err != nil {
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+
+	return openapi.Response(200, user), nil
 }

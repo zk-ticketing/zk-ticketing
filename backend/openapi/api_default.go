@@ -81,6 +81,11 @@ func (c *DefaultAPIController) Routes() Routes {
 			"/api/v1/users/request-verification-code",
 			c.UsersRequestVerificationCodePost,
 		},
+		"UsersUpdatePut": Route{
+			strings.ToUpper("Put"),
+			"/api/v1/users/update",
+			c.UsersUpdatePut,
+		},
 	}
 }
 
@@ -183,6 +188,33 @@ func (c *DefaultAPIController) UsersRequestVerificationCodePost(w http.ResponseW
 		return
 	}
 	result, err := c.service.UsersRequestVerificationCodePost(r.Context(), userEmailVerificationRequestParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	_ = EncodeJSONResponse(result.Body, &result.Code, w)
+}
+
+// UsersUpdatePut - Update user details
+func (c *DefaultAPIController) UsersUpdatePut(w http.ResponseWriter, r *http.Request) {
+	userUpdateParam := UserUpdate{}
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+	if err := d.Decode(&userUpdateParam); err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+	if err := AssertUserUpdateRequired(userUpdateParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	if err := AssertUserUpdateConstraints(userUpdateParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	result, err := c.service.UsersUpdatePut(r.Context(), userUpdateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)

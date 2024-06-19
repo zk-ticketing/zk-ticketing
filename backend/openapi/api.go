@@ -27,6 +27,7 @@ type DefaultAPIRouter interface {
 	UsersLoginPost(http.ResponseWriter, *http.Request)
 	UsersMeGet(http.ResponseWriter, *http.Request)
 	UsersRequestVerificationCodePost(http.ResponseWriter, *http.Request)
+	UsersUpdatePut(http.ResponseWriter, *http.Request)
 }
 
 
@@ -41,4 +42,5 @@ type DefaultAPIServicer interface {
 	UsersLoginPost(context.Context, UserLogin) (ImplResponse, error)
 	UsersMeGet(context.Context) (ImplResponse, error)
 	UsersRequestVerificationCodePost(context.Context, UserEmailVerificationRequest) (ImplResponse, error)
+	UsersUpdatePut(context.Context, UserUpdate) (ImplResponse, error)
 }

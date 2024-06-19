@@ -79,6 +79,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+  /users/update:
+    put:
+      summary: Update user details
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UserUpdate"
+      responses:
+        "200":
+          description: User details updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/User"
 components:
   securitySchemes:
     bearerAuth:
@@ -132,3 +150,12 @@ components:
         created_at:
           type: string
           format: date-time
+    UserUpdate:
+      type: object
+      properties:
+        identity_commitment:
+          type: string
+        encrypted_internal_nullifier:
+          type: string
+        encrypted_identity_secret:
+          type: string

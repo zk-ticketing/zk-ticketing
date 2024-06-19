@@ -80,3 +80,38 @@ func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
 	)
 	return i, err
 }
+
+const updateUser = `-- name: UpdateUser :one
+UPDATE users
+SET identity_commitment = $1,
+    encrypted_internal_nullifier = $2,
+    encrypted_identity_secret = $3
+WHERE id = $4
+RETURNING id, email, identity_commitment, encrypted_internal_nullifier, encrypted_identity_secret, created_at
+`
+
+type UpdateUserParams struct {
+	IdentityCommitment         string
+	EncryptedInternalNullifier string
+	EncryptedIdentitySecret    string
+	ID                         string
+}
+
+func (q *Queries) UpdateUser(ctx context.Context, arg UpdateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, updateUser,
+		arg.IdentityCommitment,
+		arg.EncryptedInternalNullifier,
+		arg.EncryptedIdentitySecret,
+		arg.ID,
+	)
+	var i User
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.IdentityCommitment,
+		&i.EncryptedInternalNullifier,
+		&i.EncryptedIdentitySecret,
+		&i.CreatedAt,
+	)
+	return i, err
+}
