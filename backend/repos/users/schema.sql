@@ -1,10 +1,10 @@
 CREATE TABLE users (
-    id SERIAL PRIMARY KEY,
+    id VARCHAR PRIMARY KEY,
     email VARCHAR UNIQUE NOT NULL,
-    identity_commitment VARCHAR,
-    encrypted_internal_nullifier VARCHAR,
-    encrypted_identity_secret VARCHAR,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    identity_commitment VARCHAR NOT NULL,
+    encrypted_internal_nullifier VARCHAR NOT NULL,
+    encrypted_identity_secret VARCHAR NOT NULL,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE UNIQUE INDEX idx_users_email ON users(email);

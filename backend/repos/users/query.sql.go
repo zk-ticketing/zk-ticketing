@@ -11,18 +11,24 @@ import (
 
 const createUser = `-- name: CreateUser :one
 INSERT INTO users (
+        id,
         email,
         identity_commitment,
         encrypted_internal_nullifier,
         encrypted_identity_secret,
         created_at
     )
-VALUES ($1, NULL, NULL, NULL, NOW())
+VALUES ($1, $2, '', '', '', NOW())
 RETURNING id, email, identity_commitment, encrypted_internal_nullifier, encrypted_identity_secret, created_at
 `
 
-func (q *Queries) CreateUser(ctx context.Context, email string) (User, error) {
-	row := q.db.QueryRow(ctx, createUser, email)
+type CreateUserParams struct {
+	ID    string
+	Email string
+}
+
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, error) {
+	row := q.db.QueryRow(ctx, createUser, arg.ID, arg.Email)
 	var i User
 	err := row.Scan(
 		&i.ID,
@@ -61,7 +67,7 @@ FROM users
 WHERE id = $1
 `
 
-func (q *Queries) GetUserByID(ctx context.Context, id int32) (User, error) {
+func (q *Queries) GetUserByID(ctx context.Context, id string) (User, error) {
 	row := q.db.QueryRow(ctx, getUserByID, id)
 	var i User
 	err := row.Scan(

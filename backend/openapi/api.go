@@ -24,6 +24,9 @@ type DefaultAPIRouter interface {
 	EventsEventIdGet(http.ResponseWriter, *http.Request)
 	EventsGet(http.ResponseWriter, *http.Request)
 	HealthGet(http.ResponseWriter, *http.Request)
+	UsersLoginPost(http.ResponseWriter, *http.Request)
+	UsersMeGet(http.ResponseWriter, *http.Request)
+	UsersRequestVerificationCodePost(http.ResponseWriter, *http.Request)
 }
 
 
@@ -35,4 +38,7 @@ type DefaultAPIServicer interface {
 	EventsEventIdGet(context.Context, string) (ImplResponse, error)
 	EventsGet(context.Context) (ImplResponse, error)
 	HealthGet(context.Context) (ImplResponse, error)
+	UsersLoginPost(context.Context, UserLogin) (ImplResponse, error)
+	UsersMeGet(context.Context) (ImplResponse, error)
+	UsersRequestVerificationCodePost(context.Context, UserEmailVerificationRequest) (ImplResponse, error)
 }

@@ -1,6 +1,9 @@
 FROM golang:1.21 AS build
 WORKDIR /go/src
+COPY util ./util
+COPY jwt ./jwt
 COPY openapi ./openapi
+COPY server ./server
 COPY service ./service
 COPY repos ./repos
 COPY main.go .

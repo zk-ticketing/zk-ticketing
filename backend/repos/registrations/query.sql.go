@@ -17,7 +17,7 @@ FROM registrations
 WHERE event_id = $1
 `
 
-func (q *Queries) GetEventRegistrations(ctx context.Context, eventID pgtype.Int4) ([]Registration, error) {
+func (q *Queries) GetEventRegistrations(ctx context.Context, eventID pgtype.Text) ([]Registration, error) {
 	rows, err := q.db.Query(ctx, getEventRegistrations, eventID)
 	if err != nil {
 		return nil, err

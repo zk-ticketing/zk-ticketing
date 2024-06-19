@@ -9,10 +9,10 @@ import (
 )
 
 type User struct {
-	ID                         int32
+	ID                         string
 	Email                      string
-	IdentityCommitment         pgtype.Text
-	EncryptedInternalNullifier pgtype.Text
-	EncryptedIdentitySecret    pgtype.Text
-	CreatedAt                  pgtype.Timestamp
+	IdentityCommitment         string
+	EncryptedInternalNullifier string
+	EncryptedIdentitySecret    string
+	CreatedAt                  pgtype.Timestamptz
 }

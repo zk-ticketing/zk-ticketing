@@ -10,11 +10,12 @@ WHERE email = $1;
 
 -- name: CreateUser :one
 INSERT INTO users (
+        id,
         email,
         identity_commitment,
         encrypted_internal_nullifier,
         encrypted_identity_secret,
         created_at
     )
-VALUES ($1, NULL, NULL, NULL, NOW())
+VALUES ($1, $2, '', '', '', NOW())
 RETURNING *;

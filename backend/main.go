@@ -3,14 +3,14 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
-	"net/http"
 
-	"github.com/NFTGalaxy/zk-ticketing-server/openapi"
+	"github.com/NFTGalaxy/zk-ticketing-server/jwt"
 	"github.com/NFTGalaxy/zk-ticketing-server/repos"
+	"github.com/NFTGalaxy/zk-ticketing-server/server"
 	"github.com/NFTGalaxy/zk-ticketing-server/service"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/rs/zerolog/log"
 )
 
 type config struct {
@@ -20,6 +20,8 @@ type config struct {
 	PostgresPort     int    `default:"5432"`
 	PostgresUsername string `required:"true"`
 	PostgresPassword string `required:"true"`
+	JWTSecretKey     string `required:"true"`
+	JWTExpiresSec    int64  `required:"true"`
 }
 
 func main() {
@@ -30,17 +32,18 @@ func main() {
 	// connect to the database
 	pool, err := pgxpool.New(context.Background(), fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", cfg.PostgresHost, cfg.PostgresPort, cfg.PostgresUsername, cfg.PostgresPassword, cfg.PostgresDatabase))
 	if err != nil {
-		log.Fatalf("Unable to connect to database: %v", err)
+		log.Fatal().Msgf("Unable to connect to database: %v", err)
 	}
 	defer pool.Close()
 	dbClient := repos.NewClient(pool)
 
-	// create the API service
-	apiService := service.NewAPIService(dbClient)
+	// initialize JWT service
+	jwtService := jwt.NewService(cfg.JWTSecretKey, cfg.JWTExpiresSec)
 
-	defaultAPIController := openapi.NewDefaultAPIController(apiService)
-	router := openapi.NewRouter(defaultAPIController)
+	// initialize API service
+	apiService := service.NewAPIService(dbClient, jwtService)
 
-	log.Printf("Starting server on port %d", cfg.RestPort)
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", cfg.RestPort), router))
+	// create server
+	server := server.New(dbClient, cfg.RestPort, apiService, jwtService)
+	server.Start()
 }

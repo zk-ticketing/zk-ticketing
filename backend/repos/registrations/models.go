@@ -10,6 +10,6 @@ import (
 
 type Registration struct {
 	ID      int32
-	EventID pgtype.Int4
+	EventID pgtype.Text
 	Email   string
 }

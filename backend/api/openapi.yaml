@@ -41,6 +41,46 @@ paths:
                 $ref: '#/components/schemas/Event'
           description: Event details
       summary: Get event details
+  /users/request-verification-code:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserEmailVerificationRequest'
+        required: true
+      responses:
+        "200":
+          description: Verification code sent successfully
+      summary: Request an email verification code
+  /users/login:
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLogin'
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+          description: Login successful
+      summary: User login
+  /users/me:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: User details retrieved successfully
+      security:
+      - bearerAuth: []
+      summary: Get user details
 components:
   schemas:
     Event:
@@ -62,3 +102,55 @@ components:
         admin_code:
           type: string
       type: object
+    UserEmailVerificationRequest:
+      example:
+        email: email
+      properties:
+        email:
+          type: string
+      type: object
+    UserLogin:
+      example:
+        code: code
+        email: email
+      properties:
+        email:
+          type: string
+        code:
+          type: string
+      type: object
+    LoginResponse:
+      example:
+        token: token
+      properties:
+        token:
+          type: string
+      type: object
+    User:
+      example:
+        encrypted_internal_nullifier: encrypted_internal_nullifier
+        identity_commitment: identity_commitment
+        encrypted_identity_secret: encrypted_identity_secret
+        created_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        email: email
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        identity_commitment:
+          type: string
+        encrypted_internal_nullifier:
+          type: string
+        encrypted_identity_secret:
+          type: string
+        created_at:
+          format: date-time
+          type: string
+      type: object
+  securitySchemes:
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
