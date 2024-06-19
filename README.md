@@ -60,3 +60,13 @@ Once the tunnel is running, you can access the application at:
 
 - Frontend: http://localhost:8080
 - Backend: http://localhost:3000
+
+### Open Swagger UI to test the API
+
+In a new terminal, run the following command:
+
+```
+start-swagger-ui
+```
+
+Then open the Swagger UI at http://localhost:8081 to test the API.
