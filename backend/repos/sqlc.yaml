@@ -1,0 +1,48 @@
+version: "2"
+sql:
+  - name: events
+    schema: events/schema.sql
+    queries: events/query.sql
+    engine: postgresql
+    gen:
+      go:
+        sql_package: pgx/v5
+        package: events
+        out: events
+    analyzer:
+      database: false
+    rules:
+      - sqlc/db-prepare
+      - postgresql-query-too-costly
+  - name: registrations
+    schema: registrations/schema.sql
+    queries: registrations/query.sql
+    engine: postgresql
+    gen:
+      go:
+        sql_package: pgx/v5
+        package: registrations
+        out: registrations
+    analyzer:
+      database: false
+    rules:
+      - sqlc/db-prepare
+      - postgresql-query-too-costly
+  - name: users
+    schema: users/schema.sql
+    queries: users/query.sql
+    engine: postgresql
+    gen:
+      go:
+        sql_package: pgx/v5
+        package: users
+        out: users
+    analyzer:
+      database: false
+    rules:
+      - sqlc/db-prepare
+      - postgresql-query-too-costly
+rules:
+  - name: postgresql-query-too-costly
+    message: "Too costly"
+    rule: "postgresql.explain.plan.total_cost > 300.0"

@@ -71,12 +71,9 @@ func (c *DefaultAPIController) Routes() Routes {
 // EventsEventIdGet - Get event details
 func (c *DefaultAPIController) EventsEventIdGet(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
-	eventIdParam, err := parseNumericParameter[int32](
-		params["eventId"],
-		WithRequire[int32](parseInt32),
-	)
-	if err != nil {
-		c.errorHandler(w, r, &ParsingError{Param: "eventId", Err: err}, nil)
+	eventIdParam := params["eventId"]
+	if eventIdParam == "" {
+		c.errorHandler(w, r, &RequiredError{"eventId"}, nil)
 		return
 	}
 	result, err := c.service.EventsEventIdGet(r.Context(), eventIdParam)

@@ -6,3 +6,6 @@ lint:
 lint-fix:
 	@echo "--> Running linter auto fix"
 	@golangci-lint run --fix
+
+repo:
+	cd repos && sqlc generate

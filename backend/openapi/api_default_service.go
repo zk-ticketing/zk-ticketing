@@ -28,7 +28,7 @@ func NewDefaultAPIService() *DefaultAPIService {
 }
 
 // EventsEventIdGet - Get event details
-func (s *DefaultAPIService) EventsEventIdGet(ctx context.Context, eventId int32) (ImplResponse, error) {
+func (s *DefaultAPIService) EventsEventIdGet(ctx context.Context, eventId string) (ImplResponse, error) {
 	// TODO - update EventsEventIdGet with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 

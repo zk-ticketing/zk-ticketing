@@ -31,7 +31,7 @@ paths:
         name: eventId
         required: true
         schema:
-          type: integer
+          type: string
         style: simple
       responses:
         "200":

@@ -2,6 +2,7 @@ FROM golang:1.21 AS build
 WORKDIR /go/src
 COPY openapi ./openapi
 COPY service ./service
+COPY repos ./repos
 COPY main.go .
 COPY go.sum .
 COPY go.mod .
