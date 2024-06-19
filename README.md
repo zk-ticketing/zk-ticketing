@@ -17,11 +17,24 @@ The frontend is a Next.js application that provides the user interface for the Z
 
 The backend is a Go-based HTTP server that handles the server-side logic for the application.
 
+### OpenAPI
+
+The openapi folder contains the OpenAPI specification for the ZK Ticketing system.
+
 ### Infrastructure
 
 The infra folder contains Kubernetes manifests for deploying the application.
 
-## Local Development
+## Development
+
+### Prerequisites
+
+- docker
+- minikube
+- [skaffold](http://skaffold.dev)
+- [openapi-generator](https://github.com/OpenAPITools/openapi-generator)
+
+## Running the Application Locally
 
 ### Use minikube to start local cluster
 

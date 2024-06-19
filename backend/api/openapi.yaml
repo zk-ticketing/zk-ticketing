@@ -1,0 +1,64 @@
+openapi: 3.0.3
+info:
+  title: ZK Ticketing API
+  version: 0.0.1
+servers:
+- url: http://localhost:3000/api/v1
+paths:
+  /health:
+    get:
+      responses:
+        "200":
+          description: The API is healthy
+      summary: Check the health of the API
+  /events:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Event'
+                type: array
+          description: List of events
+      summary: Get list of events
+  /events/{eventId}:
+    get:
+      parameters:
+      - explode: false
+        in: path
+        name: eventId
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Event'
+          description: Event details
+      summary: Get event details
+components:
+  schemas:
+    Event:
+      example:
+        admin_code: admin_code
+        name: name
+        description: description
+        id: id
+        url: url
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        url:
+          type: string
+        admin_code:
+          type: string
+      type: object

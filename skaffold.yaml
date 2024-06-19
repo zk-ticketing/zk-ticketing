@@ -8,11 +8,11 @@ build:
       context: frontend
       docker:
         dockerfile: Dockerfile
-    - image: server
-      context: server
+    - image: backend
+      context: backend
       docker:
         dockerfile: Dockerfile
 manifests:
   rawYaml:
     - infra/k8s/frontend.yaml
-    - infra/k8s/server.yaml
+    - infra/k8s/backend.yaml

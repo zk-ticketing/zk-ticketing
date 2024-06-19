@@ -1,0 +1,4 @@
+# OpenAPI Generator Ignore
+go.mod
+main.go
+Dockerfile
