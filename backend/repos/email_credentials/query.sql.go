@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createOne = `-- name: CreateOne :one
+const createOrUpdateOne = `-- name: CreateOrUpdateOne :one
 INSERT INTO email_credentials (
         id,
         identity_commitment,
@@ -19,11 +19,15 @@ INSERT INTO email_credentials (
         issued_at,
         expire_at
     )
-VALUES ($1, $2, $3, $4, $5)
+VALUES ($1, $2, $3, $4, $5) ON CONFLICT (identity_commitment) DO
+UPDATE
+SET data = $3,
+    issued_at = $4,
+    expire_at = $5
 RETURNING id, identity_commitment, data, issued_at, expire_at
 `
 
-type CreateOneParams struct {
+type CreateOrUpdateOneParams struct {
 	ID                 string
 	IdentityCommitment string
 	Data               string
@@ -31,8 +35,8 @@ type CreateOneParams struct {
 	ExpireAt           pgtype.Timestamptz
 }
 
-func (q *Queries) CreateOne(ctx context.Context, arg CreateOneParams) (EmailCredential, error) {
-	row := q.db.QueryRow(ctx, createOne,
+func (q *Queries) CreateOrUpdateOne(ctx context.Context, arg CreateOrUpdateOneParams) (EmailCredential, error) {
+	row := q.db.QueryRow(ctx, createOrUpdateOne,
 		arg.ID,
 		arg.IdentityCommitment,
 		arg.Data,

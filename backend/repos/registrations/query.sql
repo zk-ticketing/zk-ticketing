@@ -7,3 +7,9 @@ WHERE event_id = $1;
 SELECT *
 FROM registrations
 WHERE email = $1;
+
+-- name: GetOneByEventIdAndEmail :one
+SELECT *
+FROM registrations
+WHERE event_id = @event_id
+    AND email = @email;

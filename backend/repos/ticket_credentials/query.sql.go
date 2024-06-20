@@ -7,7 +7,56 @@ package ticket_credentials
 
 import (
 	"context"
+
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+const createOrUpdateOne = `-- name: CreateOrUpdateOne :one
+INSERT INTO ticket_credentials (
+        id,
+        email,
+        event_id,
+        data,
+        issued_at,
+        expire_at
+    )
+VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (event_id, email) DO
+UPDATE
+SET data = $4,
+    issued_at = $5,
+    expire_at = $6
+RETURNING id, email, event_id, data, issued_at, expire_at
+`
+
+type CreateOrUpdateOneParams struct {
+	ID       string
+	Email    string
+	EventID  string
+	Data     string
+	IssuedAt pgtype.Timestamptz
+	ExpireAt pgtype.Timestamptz
+}
+
+func (q *Queries) CreateOrUpdateOne(ctx context.Context, arg CreateOrUpdateOneParams) (TicketCredential, error) {
+	row := q.db.QueryRow(ctx, createOrUpdateOne,
+		arg.ID,
+		arg.Email,
+		arg.EventID,
+		arg.Data,
+		arg.IssuedAt,
+		arg.ExpireAt,
+	)
+	var i TicketCredential
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.EventID,
+		&i.Data,
+		&i.IssuedAt,
+		&i.ExpireAt,
+	)
+	return i, err
+}
 
 const getAllByEmail = `-- name: GetAllByEmail :many
 SELECT id, email, event_id, data, issued_at, expire_at
@@ -41,4 +90,31 @@ func (q *Queries) GetAllByEmail(ctx context.Context, email string) ([]TicketCred
 		return nil, err
 	}
 	return items, nil
+}
+
+const getByEventIdAndEmail = `-- name: GetByEventIdAndEmail :one
+SELECT id, email, event_id, data, issued_at, expire_at
+FROM ticket_credentials
+WHERE event_id = $1
+    AND email = $2
+LIMIT 1
+`
+
+type GetByEventIdAndEmailParams struct {
+	EventID string
+	Email   string
+}
+
+func (q *Queries) GetByEventIdAndEmail(ctx context.Context, arg GetByEventIdAndEmailParams) (TicketCredential, error) {
+	row := q.db.QueryRow(ctx, getByEventIdAndEmail, arg.EventID, arg.Email)
+	var i TicketCredential
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.EventID,
+		&i.Data,
+		&i.IssuedAt,
+		&i.ExpireAt,
+	)
+	return i, err
 }

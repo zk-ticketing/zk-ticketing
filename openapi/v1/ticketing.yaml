@@ -39,6 +39,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Event"
+  /events/{eventId}/request-ticket-credential:
+    post:
+      summary: Request a new ticket credential for an event
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Ticket credential generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnencryptedTicketCredential"
   /user/request-verification-code:
     post:
       summary: Request an email verification code
@@ -136,6 +154,20 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/TicketCredential"
+  /user/me/ticket-credential:
+    put:
+      summary: Store user ticket credential with encrypted data
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutTicketCredentialRequest"
+      responses:
+        "201":
+          description: Ticket credential stored successfully
   /user/me/request-email-credential:
     post:
       summary: Generate a new email credential
@@ -261,6 +293,36 @@ components:
         event_id:
           type: string
         data:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+        expire_at:
+          type: string
+          format: date-time
+    PutTicketCredentialRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        event_id:
+          type: string
+        data:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+        expire_at:
+          type: string
+          format: date-time
+    UnencryptedTicketCredential:
+      type: object
+      properties:
+        id:
+          type: string
+        event_id:
+          type: string
+        credential:
           type: string
         issued_at:
           type: string

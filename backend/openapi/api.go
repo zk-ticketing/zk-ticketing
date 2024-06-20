@@ -22,6 +22,7 @@ import (
 // pass the data to a DefaultAPIServicer to perform the required actions, then write the service results to the http response.
 type DefaultAPIRouter interface { 
 	EventsEventIdGet(http.ResponseWriter, *http.Request)
+	EventsEventIdRequestTicketCredentialPost(http.ResponseWriter, *http.Request)
 	EventsGet(http.ResponseWriter, *http.Request)
 	HealthGet(http.ResponseWriter, *http.Request)
 	UserLoginPost(http.ResponseWriter, *http.Request)
@@ -29,6 +30,7 @@ type DefaultAPIRouter interface {
 	UserMeEmailCredentialPut(http.ResponseWriter, *http.Request)
 	UserMeGet(http.ResponseWriter, *http.Request)
 	UserMeRequestEmailCredentialPost(http.ResponseWriter, *http.Request)
+	UserMeTicketCredentialPut(http.ResponseWriter, *http.Request)
 	UserMeTicketCredentialsGet(http.ResponseWriter, *http.Request)
 	UserRequestVerificationCodePost(http.ResponseWriter, *http.Request)
 	UserUpdatePut(http.ResponseWriter, *http.Request)
@@ -41,6 +43,7 @@ type DefaultAPIRouter interface {
 // and updated with the logic required for the API.
 type DefaultAPIServicer interface { 
 	EventsEventIdGet(context.Context, string) (ImplResponse, error)
+	EventsEventIdRequestTicketCredentialPost(context.Context, string) (ImplResponse, error)
 	EventsGet(context.Context) (ImplResponse, error)
 	HealthGet(context.Context) (ImplResponse, error)
 	UserLoginPost(context.Context, UserLogin) (ImplResponse, error)
@@ -48,6 +51,7 @@ type DefaultAPIServicer interface {
 	UserMeEmailCredentialPut(context.Context, PutEmailCredentialRequest) (ImplResponse, error)
 	UserMeGet(context.Context) (ImplResponse, error)
 	UserMeRequestEmailCredentialPost(context.Context) (ImplResponse, error)
+	UserMeTicketCredentialPut(context.Context, PutTicketCredentialRequest) (ImplResponse, error)
 	UserMeTicketCredentialsGet(context.Context) (ImplResponse, error)
 	UserRequestVerificationCodePost(context.Context, UserEmailVerificationRequest) (ImplResponse, error)
 	UserUpdatePut(context.Context, UserUpdate) (ImplResponse, error)

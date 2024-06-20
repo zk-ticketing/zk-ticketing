@@ -4,12 +4,8 @@
 
 package registrations
 
-import (
-	"github.com/jackc/pgx/v5/pgtype"
-)
-
 type Registration struct {
 	ID      int32
-	EventID pgtype.Text
+	EventID string
 	Email   string
 }

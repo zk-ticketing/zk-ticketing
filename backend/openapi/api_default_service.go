@@ -38,6 +38,17 @@ func (s *DefaultAPIService) EventsEventIdGet(ctx context.Context, eventId string
 	return Response(http.StatusNotImplemented, nil), errors.New("EventsEventIdGet method not implemented")
 }
 
+// EventsEventIdRequestTicketCredentialPost - Request a new ticket credential for an event
+func (s *DefaultAPIService) EventsEventIdRequestTicketCredentialPost(ctx context.Context, eventId string) (ImplResponse, error) {
+	// TODO - update EventsEventIdRequestTicketCredentialPost with the required logic for this service method.
+	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(201, UnencryptedTicketCredential{}) or use other options such as http.Ok ...
+	// return Response(201, UnencryptedTicketCredential{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("EventsEventIdRequestTicketCredentialPost method not implemented")
+}
+
 // EventsGet - Get list of events
 func (s *DefaultAPIService) EventsGet(ctx context.Context) (ImplResponse, error) {
 	// TODO - update EventsGet with the required logic for this service method.
@@ -113,6 +124,17 @@ func (s *DefaultAPIService) UserMeRequestEmailCredentialPost(ctx context.Context
 	// return Response(201, UnencryptedEmailCredential{}), nil
 
 	return Response(http.StatusNotImplemented, nil), errors.New("UserMeRequestEmailCredentialPost method not implemented")
+}
+
+// UserMeTicketCredentialPut - Store user ticket credential with encrypted data
+func (s *DefaultAPIService) UserMeTicketCredentialPut(ctx context.Context, putTicketCredentialRequest PutTicketCredentialRequest) (ImplResponse, error) {
+	// TODO - update UserMeTicketCredentialPut with the required logic for this service method.
+	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(201, {}) or use other options such as http.Ok ...
+	// return Response(201, nil),nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("UserMeTicketCredentialPut method not implemented")
 }
 
 // UserMeTicketCredentialsGet - Get user ticket credentials

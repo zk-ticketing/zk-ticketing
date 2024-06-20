@@ -7,8 +7,6 @@ package registrations
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const getEventRegistrations = `-- name: GetEventRegistrations :many
@@ -17,7 +15,7 @@ FROM registrations
 WHERE event_id = $1
 `
 
-func (q *Queries) GetEventRegistrations(ctx context.Context, eventID pgtype.Text) ([]Registration, error) {
+func (q *Queries) GetEventRegistrations(ctx context.Context, eventID string) ([]Registration, error) {
 	rows, err := q.db.Query(ctx, getEventRegistrations, eventID)
 	if err != nil {
 		return nil, err
@@ -35,6 +33,25 @@ func (q *Queries) GetEventRegistrations(ctx context.Context, eventID pgtype.Text
 		return nil, err
 	}
 	return items, nil
+}
+
+const getOneByEventIdAndEmail = `-- name: GetOneByEventIdAndEmail :one
+SELECT id, event_id, email
+FROM registrations
+WHERE event_id = $1
+    AND email = $2
+`
+
+type GetOneByEventIdAndEmailParams struct {
+	EventID string
+	Email   string
+}
+
+func (q *Queries) GetOneByEventIdAndEmail(ctx context.Context, arg GetOneByEventIdAndEmailParams) (Registration, error) {
+	row := q.db.QueryRow(ctx, getOneByEventIdAndEmail, arg.EventID, arg.Email)
+	var i Registration
+	err := row.Scan(&i.ID, &i.EventID, &i.Email)
+	return i, err
 }
 
 const getRegisteredEventsByEmail = `-- name: GetRegisteredEventsByEmail :many

@@ -41,6 +41,26 @@ paths:
                 $ref: '#/components/schemas/Event'
           description: Event details
       summary: Get event details
+  /events/{eventId}/request-ticket-credential:
+    post:
+      parameters:
+      - explode: false
+        in: path
+        name: eventId
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnencryptedTicketCredential'
+          description: Ticket credential generated successfully
+      security:
+      - bearerAuth: []
+      summary: Request a new ticket credential for an event
   /user/request-verification-code:
     post:
       requestBody:
@@ -138,6 +158,20 @@ paths:
       security:
       - bearerAuth: []
       summary: Get user ticket credentials
+  /user/me/ticket-credential:
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutTicketCredentialRequest'
+        required: true
+      responses:
+        "201":
+          description: Ticket credential stored successfully
+      security:
+      - bearerAuth: []
+      summary: Store user ticket credential with encrypted data
   /user/me/request-email-credential:
     post:
       responses:
@@ -304,6 +338,48 @@ components:
         event_id:
           type: string
         data:
+          type: string
+        issued_at:
+          format: date-time
+          type: string
+        expire_at:
+          format: date-time
+          type: string
+      type: object
+    PutTicketCredentialRequest:
+      example:
+        event_id: event_id
+        data: data
+        expire_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        issued_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: string
+        event_id:
+          type: string
+        data:
+          type: string
+        issued_at:
+          format: date-time
+          type: string
+        expire_at:
+          format: date-time
+          type: string
+      type: object
+    UnencryptedTicketCredential:
+      example:
+        event_id: event_id
+        credential: credential
+        expire_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        issued_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: string
+        event_id:
+          type: string
+        credential:
           type: string
         issued_at:
           format: date-time

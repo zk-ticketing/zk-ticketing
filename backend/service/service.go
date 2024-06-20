@@ -11,6 +11,8 @@ import (
 	"github.com/NFTGalaxy/zk-ticketing-server/openapi"
 	"github.com/NFTGalaxy/zk-ticketing-server/repos"
 	"github.com/NFTGalaxy/zk-ticketing-server/repos/email_credentials"
+	"github.com/NFTGalaxy/zk-ticketing-server/repos/registrations"
+	"github.com/NFTGalaxy/zk-ticketing-server/repos/ticket_credentials"
 	"github.com/NFTGalaxy/zk-ticketing-server/repos/users"
 	"github.com/NFTGalaxy/zk-ticketing-server/util"
 	"github.com/go-redis/redis/v8"
@@ -48,6 +50,61 @@ func (s *APIService) EventsEventIdGet(ctx context.Context, eventId string) (open
 		return openapi.Response(http.StatusInternalServerError, nil), err
 	}
 	return openapi.Response(http.StatusOK, MarshalEvent(event)), nil
+}
+
+// EventsEventIdRequestTicketCredentialPost - Request a new ticket credential for an event
+func (s *APIService) EventsEventIdRequestTicketCredentialPost(ctx context.Context, eventId string) (openapi.ImplResponse, error) {
+	logger := log.Ctx(ctx).With().Str("op", "UserMeEmailCredentialPut").Logger()
+	userEmail := util.GetUserEmailFromContext(ctx)
+	userID := util.GetUserIDFromContext(ctx)
+	if userID == "" || userEmail == "" {
+		return openapi.Response(http.StatusUnauthorized, nil), nil
+	}
+	logger = logger.With().Str("email", userEmail).Str("uid", userID).Logger()
+
+	// ensure user does not already have a ticket credential for this event
+	_, err := s.dbClient.TicketCredentials.GetByEventIdAndEmail(ctx, ticket_credentials.GetByEventIdAndEmailParams{
+		EventID: eventId,
+		Email:   userEmail,
+	})
+	if err != nil {
+		if err != pgx.ErrNoRows {
+			logger.Err(err).Msg("Failed to get existing ticket credential")
+			return openapi.Response(http.StatusInternalServerError, nil), err
+		}
+	} else {
+		errMsg := "User already has a ticket credential for this event, cannot request again"
+		logger.Info().Msg(errMsg)
+		return openapi.Response(http.StatusBadRequest, errMsg), nil
+	}
+
+	// check registration
+	_, err = s.dbClient.Registrations.GetOneByEventIdAndEmail(ctx, registrations.GetOneByEventIdAndEmailParams{
+		EventID: eventId,
+		Email:   userEmail,
+	})
+	if err != nil {
+		if err != pgx.ErrNoRows {
+			logger.Err(err).Msg("Failed to get registration")
+			return openapi.Response(http.StatusInternalServerError, nil), err
+		}
+		errMsg := "No user registration found for this event"
+		logger.Info().Msg(errMsg)
+		return openapi.Response(http.StatusBadRequest, errMsg), nil
+	}
+
+	// found registration, create ticket credential
+	// TODO: issuer issue ticket credential
+	mockCredential := "mock-credential"
+
+	logger.Info().Msg("Generated ticket credential")
+	return openapi.Response(http.StatusCreated, openapi.UnencryptedTicketCredential{
+		Id:         "mock-id",
+		EventId:    eventId,
+		Credential: mockCredential,
+		IssuedAt:   time.Now(),
+		ExpireAt:   time.Now().Add(time.Hour * 24),
+	}), nil
 }
 
 // EventsGet - Get list of events
@@ -294,23 +351,14 @@ func (s *APIService) UserMeEmailCredentialPut(ctx context.Context, putEmailCrede
 		return openapi.Response(http.StatusInternalServerError, nil), err
 	}
 
-	// ensure user does not already have an email credential
-	_, err = s.dbClient.EmailCredentials.GetByIdentityCommitment(ctx, user.IdentityCommitment)
-	if err != nil {
-		if err != pgx.ErrNoRows {
-			logger.Err(err).Msg("Failed to get existing email credential")
-			return openapi.Response(http.StatusInternalServerError, nil), err
-		} else {
-			// ok
-		}
-	} else {
-		errMsg := "User already has an email credential, cannot create again"
+	if user.IdentityCommitment == "" {
+		errMsg := "User identity commitment not set, cannot store email credential"
 		logger.Info().Msg(errMsg)
 		return openapi.Response(http.StatusBadRequest, errMsg), nil
 	}
 
 	// create email credential
-	emailCredential, err := s.dbClient.EmailCredentials.CreateOne(ctx, email_credentials.CreateOneParams{
+	emailCredential, err := s.dbClient.EmailCredentials.CreateOrUpdateOne(ctx, email_credentials.CreateOrUpdateOneParams{
 		ID:                 putEmailCredentialRequest.Id,
 		IdentityCommitment: user.IdentityCommitment,
 		Data:               putEmailCredentialRequest.Data,
@@ -344,6 +392,33 @@ func (s *APIService) UserMeRequestEmailCredentialPost(ctx context.Context) (open
 		IssuedAt:   time.Now(),
 		ExpireAt:   time.Now().Add(time.Hour * 24),
 	}), nil
+}
+
+// UserMeTicketCredentialPut - Store user ticket credential with encrypted data
+func (s *APIService) UserMeTicketCredentialPut(ctx context.Context, putTicketCredentialRequest openapi.PutTicketCredentialRequest) (openapi.ImplResponse, error) {
+	logger := log.Ctx(ctx).With().Str("op", "UserMeTicketCredentialPut").Logger()
+	userEmail := util.GetUserEmailFromContext(ctx)
+	userID := util.GetUserIDFromContext(ctx)
+	if userID == "" || userEmail == "" {
+		return openapi.Response(http.StatusUnauthorized, nil), nil
+	}
+	logger = logger.With().Str("email", userEmail).Str("uid", userID).Logger()
+
+	// create ticket credential
+	ticketCredential, err := s.dbClient.TicketCredentials.CreateOrUpdateOne(ctx, ticket_credentials.CreateOrUpdateOneParams{
+		ID:       putTicketCredentialRequest.Id,
+		Email:    userEmail,
+		EventID:  putTicketCredentialRequest.EventId,
+		Data:     putTicketCredentialRequest.Data,
+		IssuedAt: pgtype.Timestamptz{Time: putTicketCredentialRequest.IssuedAt, Valid: true},
+		ExpireAt: pgtype.Timestamptz{Time: putTicketCredentialRequest.ExpireAt, Valid: true},
+	})
+	if err != nil {
+		logger.Err(err).Msg("Failed to create ticket credential")
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+
+	return openapi.Response(http.StatusCreated, MarshalTicketCredential(ticketCredential)), nil
 }
 
 // UserMeTicketCredentialsGet - Get user ticket credentials

@@ -56,6 +56,11 @@ func (c *DefaultAPIController) Routes() Routes {
 			"/api/v1/events/{eventId}",
 			c.EventsEventIdGet,
 		},
+		"EventsEventIdRequestTicketCredentialPost": Route{
+			strings.ToUpper("Post"),
+			"/api/v1/events/{eventId}/request-ticket-credential",
+			c.EventsEventIdRequestTicketCredentialPost,
+		},
 		"EventsGet": Route{
 			strings.ToUpper("Get"),
 			"/api/v1/events",
@@ -91,6 +96,11 @@ func (c *DefaultAPIController) Routes() Routes {
 			"/api/v1/user/me/request-email-credential",
 			c.UserMeRequestEmailCredentialPost,
 		},
+		"UserMeTicketCredentialPut": Route{
+			strings.ToUpper("Put"),
+			"/api/v1/user/me/ticket-credential",
+			c.UserMeTicketCredentialPut,
+		},
 		"UserMeTicketCredentialsGet": Route{
 			strings.ToUpper("Get"),
 			"/api/v1/user/me/ticket-credentials",
@@ -118,6 +128,24 @@ func (c *DefaultAPIController) EventsEventIdGet(w http.ResponseWriter, r *http.R
 		return
 	}
 	result, err := c.service.EventsEventIdGet(r.Context(), eventIdParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	_ = EncodeJSONResponse(result.Body, &result.Code, w)
+}
+
+// EventsEventIdRequestTicketCredentialPost - Request a new ticket credential for an event
+func (c *DefaultAPIController) EventsEventIdRequestTicketCredentialPost(w http.ResponseWriter, r *http.Request) {
+	params := mux.Vars(r)
+	eventIdParam := params["eventId"]
+	if eventIdParam == "" {
+		c.errorHandler(w, r, &RequiredError{"eventId"}, nil)
+		return
+	}
+	result, err := c.service.EventsEventIdRequestTicketCredentialPost(r.Context(), eventIdParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -232,6 +260,33 @@ func (c *DefaultAPIController) UserMeGet(w http.ResponseWriter, r *http.Request)
 // UserMeRequestEmailCredentialPost - Generate a new email credential
 func (c *DefaultAPIController) UserMeRequestEmailCredentialPost(w http.ResponseWriter, r *http.Request) {
 	result, err := c.service.UserMeRequestEmailCredentialPost(r.Context())
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	_ = EncodeJSONResponse(result.Body, &result.Code, w)
+}
+
+// UserMeTicketCredentialPut - Store user ticket credential with encrypted data
+func (c *DefaultAPIController) UserMeTicketCredentialPut(w http.ResponseWriter, r *http.Request) {
+	putTicketCredentialRequestParam := PutTicketCredentialRequest{}
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+	if err := d.Decode(&putTicketCredentialRequestParam); err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+	if err := AssertPutTicketCredentialRequestRequired(putTicketCredentialRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	if err := AssertPutTicketCredentialRequestConstraints(putTicketCredentialRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	result, err := c.service.UserMeTicketCredentialPut(r.Context(), putTicketCredentialRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
