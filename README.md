@@ -30,6 +30,7 @@ The infra folder contains Kubernetes manifests for deploying the application.
 ### Prerequisites
 
 - docker
+- kubectl
 - minikube
 - [skaffold](http://skaffold.dev)
 - [openapi-generator](https://github.com/OpenAPITools/openapi-generator)
@@ -52,6 +53,8 @@ skaffold dev
 
 ### Access the application
 
+Port-forward backend and frontend (since they are using LoadBalancer type service):
+
 ```
 minikube tunnel -p zk-ticketing
 ```
@@ -61,6 +64,19 @@ Once the tunnel is running, you can access the application at:
 - Frontend: http://localhost:8080
 - Backend: http://localhost:3000
 
+Port-forward postgres db:
+
+```
+kubectl port-forward svc/postgres 5432:5432
+```
+
+Once the tunnel is running, you can access db using any postgres client (e.g. pgAdmin, DBeaver, etc.) with the following credentials (for local development only:
+
+- Host: localhost
+- Port: 5432
+- Username: postgres
+- Password: password
+
 ### Open Swagger UI to test the API
 
 In a new terminal, run the following command:
@@ -69,4 +85,4 @@ In a new terminal, run the following command:
 start-swagger-ui
 ```
 
-Then open the Swagger UI at http://localhost:8081 to test the API.
+Then open the Swagger UI at http://localhost:8081 to test the API against our forwarded backend port.
