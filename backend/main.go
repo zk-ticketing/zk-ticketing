@@ -10,6 +10,7 @@ import (
 	"github.com/NFTGalaxy/zk-ticketing-server/service"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
 
@@ -28,6 +29,11 @@ func main() {
 	// load the configuration from the environment variables
 	var cfg config
 	envconfig.MustProcess("backend", &cfg)
+
+	// set up logger
+	log.Logger = log.With().Caller().Logger()
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	zerolog.DefaultContextLogger = &log.Logger
 
 	// connect to the database
 	pool, err := pgxpool.New(context.Background(), fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable", cfg.PostgresHost, cfg.PostgresPort, cfg.PostgresUsername, cfg.PostgresPassword, cfg.PostgresDatabase))

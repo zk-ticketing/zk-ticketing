@@ -4,14 +4,17 @@ import (
 	"context"
 	"net/http"
 	"net/mail"
+	"time"
 
 	"github.com/NFTGalaxy/zk-ticketing-server/jwt"
 	"github.com/NFTGalaxy/zk-ticketing-server/openapi"
 	"github.com/NFTGalaxy/zk-ticketing-server/repos"
+	"github.com/NFTGalaxy/zk-ticketing-server/repos/email_credentials"
 	"github.com/NFTGalaxy/zk-ticketing-server/repos/users"
 	"github.com/NFTGalaxy/zk-ticketing-server/util"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rs/zerolog/log"
 )
 
@@ -55,8 +58,8 @@ func (s *APIService) HealthGet(ctx context.Context) (openapi.ImplResponse, error
 	return openapi.Response(http.StatusOK, "OK"), nil
 }
 
-// UsersLoginPost - User login
-func (s *APIService) UsersLoginPost(ctx context.Context, userLogin openapi.UserLogin) (openapi.ImplResponse, error) {
+// UserLoginPost - User login
+func (s *APIService) UserLoginPost(ctx context.Context, userLogin openapi.UserLogin) (openapi.ImplResponse, error) {
 	logger := log.Ctx(ctx).With().Str("op", "UsersLoginPost").Logger()
 
 	// TODO: handle user login code - now it's useful to test the API
@@ -93,8 +96,8 @@ func (s *APIService) UsersLoginPost(ctx context.Context, userLogin openapi.UserL
 	return openapi.Response(http.StatusOK, openapi.LoginResponse{Token: token}), nil
 }
 
-// UsersMeGet - Get user details
-func (s *APIService) UsersMeGet(ctx context.Context) (openapi.ImplResponse, error) {
+// UserMeGet - Get user details
+func (s *APIService) UserMeGet(ctx context.Context) (openapi.ImplResponse, error) {
 	logger := log.Ctx(ctx).With().Str("op", "UsersMeGet").Logger()
 	userEmail := util.GetUserEmailFromContext(ctx)
 	userID := util.GetUserIDFromContext(ctx)
@@ -115,8 +118,8 @@ func (s *APIService) UsersMeGet(ctx context.Context) (openapi.ImplResponse, erro
 	return openapi.Response(http.StatusOK, MarshalUser(user)), nil
 }
 
-// UsersRequestVerificationCodePost - Request an email verification code
-func (s *APIService) UsersRequestVerificationCodePost(ctx context.Context, userEmailVerificationRequest openapi.UserEmailVerificationRequest) (openapi.ImplResponse, error) {
+// UserRequestVerificationCodePost - Request an email verification code
+func (s *APIService) UserRequestVerificationCodePost(ctx context.Context, userEmailVerificationRequest openapi.UserEmailVerificationRequest) (openapi.ImplResponse, error) {
 	logger := log.Ctx(ctx).With().Str("op", "UsersRequestVerificationCodePost").Logger()
 
 	email, err := mail.ParseAddress(userEmailVerificationRequest.Email)
@@ -133,8 +136,8 @@ func (s *APIService) UsersRequestVerificationCodePost(ctx context.Context, userE
 	return openapi.Response(http.StatusOK, nil), nil
 }
 
-// UsersUpdatePut - Update user details
-func (s *APIService) UsersUpdatePut(ctx context.Context, userUpdate openapi.UserUpdate) (openapi.ImplResponse, error) {
+// UserUpdatePut - Update user details
+func (s *APIService) UserUpdatePut(ctx context.Context, userUpdate openapi.UserUpdate) (openapi.ImplResponse, error) {
 	logger := log.Ctx(ctx).With().Str("op", "UsersUpdatePut").Logger()
 	userEmail := util.GetUserEmailFromContext(ctx)
 	userID := util.GetUserIDFromContext(ctx)
@@ -175,4 +178,134 @@ func (s *APIService) UsersUpdatePut(ctx context.Context, userUpdate openapi.User
 	}
 
 	return openapi.Response(200, user), nil
+}
+
+func (s *APIService) UserMeEmailCredentialGet(ctx context.Context) (openapi.ImplResponse, error) {
+	logger := log.Ctx(ctx).With().Str("op", "UserMeEmailCredentialGet").Logger()
+	userEmail := util.GetUserEmailFromContext(ctx)
+	userID := util.GetUserIDFromContext(ctx)
+	if userID == "" || userEmail == "" {
+		return openapi.Response(http.StatusUnauthorized, nil), nil
+	}
+	logger = logger.With().Str("email", userEmail).Str("uid", userID).Logger()
+
+	// get user from database
+	user, err := s.dbClient.Users.GetUserByID(ctx, userID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			logger.Err(err).Msg("User not found")
+			return openapi.Response(http.StatusNotFound, nil), nil
+		}
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+
+	if user.IdentityCommitment != "" {
+		emailCredential, err := s.dbClient.EmailCredentials.GetByIdentityCommitment(ctx, user.IdentityCommitment)
+		if err != nil {
+			if err == pgx.ErrNoRows {
+				// do nothing
+				logger.Info().Msg("Email credential not found")
+			} else {
+				logger.Err(err).Msg("Failed to get email credential")
+				return openapi.Response(http.StatusInternalServerError, nil), err
+			}
+		} else {
+			credential := MarshalEmailCredential(emailCredential)
+			return openapi.Response(http.StatusOK, credential), nil
+		}
+	}
+
+	return openapi.Response(http.StatusOK, nil), nil
+}
+
+// UserMeEmailCredentialPut - Store user email credential with encrypted data
+func (s *APIService) UserMeEmailCredentialPut(ctx context.Context, putEmailCredentialRequest openapi.PutEmailCredentialRequest) (openapi.ImplResponse, error) {
+	logger := log.Ctx(ctx).With().Str("op", "UserMeEmailCredentialPut").Logger()
+	userEmail := util.GetUserEmailFromContext(ctx)
+	userID := util.GetUserIDFromContext(ctx)
+	if userID == "" || userEmail == "" {
+		return openapi.Response(http.StatusUnauthorized, nil), nil
+	}
+	logger = logger.With().Str("email", userEmail).Str("uid", userID).Logger()
+
+	// get user from database
+	user, err := s.dbClient.Users.GetUserByID(ctx, userID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			logger.Err(err).Msg("User not found")
+			return openapi.Response(http.StatusNotFound, nil), nil
+		}
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+
+	// ensure user does not already have an email credential
+	_, err = s.dbClient.EmailCredentials.GetByIdentityCommitment(ctx, user.IdentityCommitment)
+	if err != nil {
+		if err != pgx.ErrNoRows {
+			logger.Err(err).Msg("Failed to get existing email credential")
+			return openapi.Response(http.StatusInternalServerError, nil), err
+		} else {
+			// ok
+		}
+	} else {
+		errMsg := "User already has an email credential, cannot create again"
+		logger.Info().Msg(errMsg)
+		return openapi.Response(http.StatusBadRequest, errMsg), nil
+	}
+
+	// create email credential
+	emailCredential, err := s.dbClient.EmailCredentials.CreateOne(ctx, email_credentials.CreateOneParams{
+		ID:                 putEmailCredentialRequest.Id,
+		IdentityCommitment: user.IdentityCommitment,
+		Data:               putEmailCredentialRequest.Data,
+		IssuedAt:           pgtype.Timestamptz{Time: putEmailCredentialRequest.IssuedAt, Valid: true},
+		ExpireAt:           pgtype.Timestamptz{Time: putEmailCredentialRequest.ExpireAt, Valid: true},
+	})
+	if err != nil {
+		logger.Err(err).Msg("Failed to create email credential")
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+
+	return openapi.Response(http.StatusCreated, MarshalEmailCredential(emailCredential)), nil
+}
+
+func (s *APIService) UserMeRequestEmailCredentialPost(ctx context.Context) (openapi.ImplResponse, error) {
+	logger := log.Ctx(ctx).With().Str("op", "UserMeRequestEmailCredentialPost").Logger()
+	userEmail := util.GetUserEmailFromContext(ctx)
+	userID := util.GetUserIDFromContext(ctx)
+	if userID == "" || userEmail == "" {
+		return openapi.Response(http.StatusUnauthorized, nil), nil
+	}
+	logger = logger.With().Str("email", userEmail).Str("uid", userID).Logger()
+
+	// TODO: issuer issue email credential
+	mockCredential := "mock-credential"
+
+	logger.Info().Msg("Generated email credential")
+	return openapi.Response(http.StatusCreated, openapi.UnencryptedEmailCredential{
+		Id:         "mock-id",
+		Credential: mockCredential,
+		IssuedAt:   time.Now(),
+		ExpireAt:   time.Now().Add(time.Hour * 24),
+	}), nil
+}
+
+// UserMeTicketCredentialsGet - Get user ticket credentials
+func (s *APIService) UserMeTicketCredentialsGet(ctx context.Context) (openapi.ImplResponse, error) {
+	logger := log.Ctx(ctx).With().Str("op", "UsersUpdatePut").Logger()
+	userEmail := util.GetUserEmailFromContext(ctx)
+	userID := util.GetUserIDFromContext(ctx)
+	if userID == "" || userEmail == "" {
+		return openapi.Response(http.StatusUnauthorized, nil), nil
+	}
+	logger = logger.With().Str("email", userEmail).Str("uid", userID).Logger()
+
+	// get ticket credentials from database
+	tcs, err := s.dbClient.TicketCredentials.GetAllByEmail(ctx, userEmail)
+	if err != nil {
+		logger.Err(err).Msg("Failed to get ticket credentials")
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+
+	return openapi.Response(http.StatusOK, MarshalTicketCredentials(tcs)), nil
 }

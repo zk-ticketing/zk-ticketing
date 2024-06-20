@@ -1,5 +1,19 @@
 version: "2"
 sql:
+  - name: email_credentials
+    schema: email_credentials/schema.sql
+    queries: email_credentials/query.sql
+    engine: postgresql
+    gen:
+      go:
+        sql_package: pgx/v5
+        package: email_credentials
+        out: email_credentials
+    analyzer:
+      database: false
+    rules:
+      - sqlc/db-prepare
+      - postgresql-query-too-costly
   - name: events
     schema: events/schema.sql
     queries: events/query.sql
@@ -23,6 +37,20 @@ sql:
         sql_package: pgx/v5
         package: registrations
         out: registrations
+    analyzer:
+      database: false
+    rules:
+      - sqlc/db-prepare
+      - postgresql-query-too-costly
+  - name: ticket_credentials
+    schema: ticket_credentials/schema.sql
+    queries: ticket_credentials/query.sql
+    engine: postgresql
+    gen:
+      go:
+        sql_package: pgx/v5
+        package: ticket_credentials
+        out: ticket_credentials
     analyzer:
       database: false
     rules:

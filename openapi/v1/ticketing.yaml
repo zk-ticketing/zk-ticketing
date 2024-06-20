@@ -39,7 +39,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/Event"
-  /users/request-verification-code:
+  /user/request-verification-code:
     post:
       summary: Request an email verification code
       requestBody:
@@ -51,7 +51,7 @@ paths:
       responses:
         "200":
           description: Verification code sent successfully
-  /users/login:
+  /user/login:
     post:
       summary: User login
       requestBody:
@@ -67,7 +67,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/LoginResponse"
-  /users/me:
+  /user/me:
     get:
       summary: Get user details
       security:
@@ -79,7 +79,7 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
-  /users/update:
+  /user/update:
     put:
       summary: Update user details
       security:
@@ -97,6 +97,57 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/User"
+  /user/me/email-credential:
+    get:
+      summary: Get user email credential
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User email credential retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EmailCredential"
+    put:
+      summary: Store user email credential with encrypted data
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PutEmailCredentialRequest"
+      responses:
+        "201":
+          description: Email credential stored successfully
+  /user/me/ticket-credentials:
+    get:
+      summary: Get user ticket credentials
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User credentials retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TicketCredential"
+  /user/me/request-email-credential:
+    post:
+      summary: Generate a new email credential
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Email credential generated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UnencryptedEmailCredential"
 components:
   securitySchemes:
     bearerAuth:
@@ -159,3 +210,61 @@ components:
           type: string
         encrypted_identity_secret:
           type: string
+    EmailCredential:
+      type: object
+      properties:
+        id:
+          type: string
+        identity_commitment:
+          type: string
+        data:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+        expire_at:
+          type: string
+          format: date-time
+    PutEmailCredentialRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        data:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+        expire_at:
+          type: string
+          format: date-time
+    UnencryptedEmailCredential:
+      type: object
+      properties:
+        id:
+          type: string
+        credential:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+        expire_at:
+          type: string
+          format: date-time
+    TicketCredential:
+      type: object
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        event_id:
+          type: string
+        data:
+          type: string
+        issued_at:
+          type: string
+          format: date-time
+        expire_at:
+          type: string
+          format: date-time

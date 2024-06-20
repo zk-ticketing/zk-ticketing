@@ -2,7 +2,9 @@ package service
 
 import (
 	"github.com/NFTGalaxy/zk-ticketing-server/openapi"
+	"github.com/NFTGalaxy/zk-ticketing-server/repos/email_credentials"
 	"github.com/NFTGalaxy/zk-ticketing-server/repos/events"
+	"github.com/NFTGalaxy/zk-ticketing-server/repos/ticket_credentials"
 	"github.com/NFTGalaxy/zk-ticketing-server/repos/users"
 )
 
@@ -33,4 +35,33 @@ func MarshalUser(user users.User) openapi.User {
 		EncryptedIdentitySecret:    user.EncryptedIdentitySecret,
 		CreatedAt:                  user.CreatedAt.Time,
 	}
+}
+
+func MarshalEmailCredential(credential email_credentials.EmailCredential) openapi.EmailCredential {
+	return openapi.EmailCredential{
+		Id:                 credential.ID,
+		IdentityCommitment: credential.IdentityCommitment,
+		Data:               credential.Data,
+		IssuedAt:           credential.IssuedAt.Time,
+		ExpireAt:           credential.ExpireAt.Time,
+	}
+}
+
+func MarshalTicketCredential(credentials ticket_credentials.TicketCredential) openapi.TicketCredential {
+	return openapi.TicketCredential{
+		Id:       credentials.ID,
+		Email:    credentials.Email,
+		EventId:  credentials.EventID,
+		Data:     credentials.Data,
+		IssuedAt: credentials.IssuedAt.Time,
+		ExpireAt: credentials.ExpireAt.Time,
+	}
+}
+
+func MarshalTicketCredentials(credentials []ticket_credentials.TicketCredential) []openapi.TicketCredential {
+	marshaledCredentials := make([]openapi.TicketCredential, len(credentials))
+	for i, credential := range credentials {
+		marshaledCredentials[i] = MarshalTicketCredential(credential)
+	}
+	return marshaledCredentials
 }

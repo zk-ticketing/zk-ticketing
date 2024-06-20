@@ -66,25 +66,45 @@ func (c *DefaultAPIController) Routes() Routes {
 			"/api/v1/health",
 			c.HealthGet,
 		},
-		"UsersLoginPost": Route{
+		"UserLoginPost": Route{
 			strings.ToUpper("Post"),
-			"/api/v1/users/login",
-			c.UsersLoginPost,
+			"/api/v1/user/login",
+			c.UserLoginPost,
 		},
-		"UsersMeGet": Route{
+		"UserMeEmailCredentialGet": Route{
 			strings.ToUpper("Get"),
-			"/api/v1/users/me",
-			c.UsersMeGet,
+			"/api/v1/user/me/email-credential",
+			c.UserMeEmailCredentialGet,
 		},
-		"UsersRequestVerificationCodePost": Route{
-			strings.ToUpper("Post"),
-			"/api/v1/users/request-verification-code",
-			c.UsersRequestVerificationCodePost,
-		},
-		"UsersUpdatePut": Route{
+		"UserMeEmailCredentialPut": Route{
 			strings.ToUpper("Put"),
-			"/api/v1/users/update",
-			c.UsersUpdatePut,
+			"/api/v1/user/me/email-credential",
+			c.UserMeEmailCredentialPut,
+		},
+		"UserMeGet": Route{
+			strings.ToUpper("Get"),
+			"/api/v1/user/me",
+			c.UserMeGet,
+		},
+		"UserMeRequestEmailCredentialPost": Route{
+			strings.ToUpper("Post"),
+			"/api/v1/user/me/request-email-credential",
+			c.UserMeRequestEmailCredentialPost,
+		},
+		"UserMeTicketCredentialsGet": Route{
+			strings.ToUpper("Get"),
+			"/api/v1/user/me/ticket-credentials",
+			c.UserMeTicketCredentialsGet,
+		},
+		"UserRequestVerificationCodePost": Route{
+			strings.ToUpper("Post"),
+			"/api/v1/user/request-verification-code",
+			c.UserRequestVerificationCodePost,
+		},
+		"UserUpdatePut": Route{
+			strings.ToUpper("Put"),
+			"/api/v1/user/update",
+			c.UserUpdatePut,
 		},
 	}
 }
@@ -131,8 +151,8 @@ func (c *DefaultAPIController) HealthGet(w http.ResponseWriter, r *http.Request)
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// UsersLoginPost - User login
-func (c *DefaultAPIController) UsersLoginPost(w http.ResponseWriter, r *http.Request) {
+// UserLoginPost - User login
+func (c *DefaultAPIController) UserLoginPost(w http.ResponseWriter, r *http.Request) {
 	userLoginParam := UserLogin{}
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
@@ -148,7 +168,7 @@ func (c *DefaultAPIController) UsersLoginPost(w http.ResponseWriter, r *http.Req
 		c.errorHandler(w, r, err, nil)
 		return
 	}
-	result, err := c.service.UsersLoginPost(r.Context(), userLoginParam)
+	result, err := c.service.UserLoginPost(r.Context(), userLoginParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -158,9 +178,9 @@ func (c *DefaultAPIController) UsersLoginPost(w http.ResponseWriter, r *http.Req
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// UsersMeGet - Get user details
-func (c *DefaultAPIController) UsersMeGet(w http.ResponseWriter, r *http.Request) {
-	result, err := c.service.UsersMeGet(r.Context())
+// UserMeEmailCredentialGet - Get user email credential
+func (c *DefaultAPIController) UserMeEmailCredentialGet(w http.ResponseWriter, r *http.Request) {
+	result, err := c.service.UserMeEmailCredentialGet(r.Context())
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -170,8 +190,71 @@ func (c *DefaultAPIController) UsersMeGet(w http.ResponseWriter, r *http.Request
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// UsersRequestVerificationCodePost - Request an email verification code
-func (c *DefaultAPIController) UsersRequestVerificationCodePost(w http.ResponseWriter, r *http.Request) {
+// UserMeEmailCredentialPut - Store user email credential with encrypted data
+func (c *DefaultAPIController) UserMeEmailCredentialPut(w http.ResponseWriter, r *http.Request) {
+	putEmailCredentialRequestParam := PutEmailCredentialRequest{}
+	d := json.NewDecoder(r.Body)
+	d.DisallowUnknownFields()
+	if err := d.Decode(&putEmailCredentialRequestParam); err != nil {
+		c.errorHandler(w, r, &ParsingError{Err: err}, nil)
+		return
+	}
+	if err := AssertPutEmailCredentialRequestRequired(putEmailCredentialRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	if err := AssertPutEmailCredentialRequestConstraints(putEmailCredentialRequestParam); err != nil {
+		c.errorHandler(w, r, err, nil)
+		return
+	}
+	result, err := c.service.UserMeEmailCredentialPut(r.Context(), putEmailCredentialRequestParam)
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	_ = EncodeJSONResponse(result.Body, &result.Code, w)
+}
+
+// UserMeGet - Get user details
+func (c *DefaultAPIController) UserMeGet(w http.ResponseWriter, r *http.Request) {
+	result, err := c.service.UserMeGet(r.Context())
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	_ = EncodeJSONResponse(result.Body, &result.Code, w)
+}
+
+// UserMeRequestEmailCredentialPost - Generate a new email credential
+func (c *DefaultAPIController) UserMeRequestEmailCredentialPost(w http.ResponseWriter, r *http.Request) {
+	result, err := c.service.UserMeRequestEmailCredentialPost(r.Context())
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	_ = EncodeJSONResponse(result.Body, &result.Code, w)
+}
+
+// UserMeTicketCredentialsGet - Get user ticket credentials
+func (c *DefaultAPIController) UserMeTicketCredentialsGet(w http.ResponseWriter, r *http.Request) {
+	result, err := c.service.UserMeTicketCredentialsGet(r.Context())
+	// If an error occurred, encode the error with the status code
+	if err != nil {
+		c.errorHandler(w, r, err, &result)
+		return
+	}
+	// If no error, encode the body and the result code
+	_ = EncodeJSONResponse(result.Body, &result.Code, w)
+}
+
+// UserRequestVerificationCodePost - Request an email verification code
+func (c *DefaultAPIController) UserRequestVerificationCodePost(w http.ResponseWriter, r *http.Request) {
 	userEmailVerificationRequestParam := UserEmailVerificationRequest{}
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
@@ -187,7 +270,7 @@ func (c *DefaultAPIController) UsersRequestVerificationCodePost(w http.ResponseW
 		c.errorHandler(w, r, err, nil)
 		return
 	}
-	result, err := c.service.UsersRequestVerificationCodePost(r.Context(), userEmailVerificationRequestParam)
+	result, err := c.service.UserRequestVerificationCodePost(r.Context(), userEmailVerificationRequestParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)
@@ -197,8 +280,8 @@ func (c *DefaultAPIController) UsersRequestVerificationCodePost(w http.ResponseW
 	_ = EncodeJSONResponse(result.Body, &result.Code, w)
 }
 
-// UsersUpdatePut - Update user details
-func (c *DefaultAPIController) UsersUpdatePut(w http.ResponseWriter, r *http.Request) {
+// UserUpdatePut - Update user details
+func (c *DefaultAPIController) UserUpdatePut(w http.ResponseWriter, r *http.Request) {
 	userUpdateParam := UserUpdate{}
 	d := json.NewDecoder(r.Body)
 	d.DisallowUnknownFields()
@@ -214,7 +297,7 @@ func (c *DefaultAPIController) UsersUpdatePut(w http.ResponseWriter, r *http.Req
 		c.errorHandler(w, r, err, nil)
 		return
 	}
-	result, err := c.service.UsersUpdatePut(r.Context(), userUpdateParam)
+	result, err := c.service.UserUpdatePut(r.Context(), userUpdateParam)
 	// If an error occurred, encode the error with the status code
 	if err != nil {
 		c.errorHandler(w, r, err, &result)

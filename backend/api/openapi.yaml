@@ -41,7 +41,7 @@ paths:
                 $ref: '#/components/schemas/Event'
           description: Event details
       summary: Get event details
-  /users/request-verification-code:
+  /user/request-verification-code:
     post:
       requestBody:
         content:
@@ -53,7 +53,7 @@ paths:
         "200":
           description: Verification code sent successfully
       summary: Request an email verification code
-  /users/login:
+  /user/login:
     post:
       requestBody:
         content:
@@ -69,7 +69,7 @@ paths:
                 $ref: '#/components/schemas/LoginResponse'
           description: Login successful
       summary: User login
-  /users/me:
+  /user/me:
     get:
       responses:
         "200":
@@ -81,7 +81,7 @@ paths:
       security:
       - bearerAuth: []
       summary: Get user details
-  /users/update:
+  /user/update:
     put:
       requestBody:
         content:
@@ -99,6 +99,57 @@ paths:
       security:
       - bearerAuth: []
       summary: Update user details
+  /user/me/email-credential:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EmailCredential'
+          description: User email credential retrieved successfully
+      security:
+      - bearerAuth: []
+      summary: Get user email credential
+    put:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PutEmailCredentialRequest'
+        required: true
+      responses:
+        "201":
+          description: Email credential stored successfully
+      security:
+      - bearerAuth: []
+      summary: Store user email credential with encrypted data
+  /user/me/ticket-credentials:
+    get:
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/TicketCredential'
+                type: array
+          description: User credentials retrieved successfully
+      security:
+      - bearerAuth: []
+      summary: Get user ticket credentials
+  /user/me/request-email-credential:
+    post:
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UnencryptedEmailCredential'
+          description: Email credential generated successfully
+      security:
+      - bearerAuth: []
+      summary: Generate a new email credential
 components:
   schemas:
     Event:
@@ -178,6 +229,87 @@ components:
         encrypted_internal_nullifier:
           type: string
         encrypted_identity_secret:
+          type: string
+      type: object
+    EmailCredential:
+      example:
+        identity_commitment: identity_commitment
+        data: data
+        expire_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        issued_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: string
+        identity_commitment:
+          type: string
+        data:
+          type: string
+        issued_at:
+          format: date-time
+          type: string
+        expire_at:
+          format: date-time
+          type: string
+      type: object
+    PutEmailCredentialRequest:
+      example:
+        data: data
+        expire_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        issued_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: string
+        data:
+          type: string
+        issued_at:
+          format: date-time
+          type: string
+        expire_at:
+          format: date-time
+          type: string
+      type: object
+    UnencryptedEmailCredential:
+      example:
+        credential: credential
+        expire_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        issued_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: string
+        credential:
+          type: string
+        issued_at:
+          format: date-time
+          type: string
+        expire_at:
+          format: date-time
+          type: string
+      type: object
+    TicketCredential:
+      example:
+        event_id: event_id
+        data: data
+        expire_at: 2000-01-23T04:56:07.000+00:00
+        id: id
+        issued_at: 2000-01-23T04:56:07.000+00:00
+        email: email
+      properties:
+        id:
+          type: string
+        email:
+          type: string
+        event_id:
+          type: string
+        data:
+          type: string
+        issued_at:
+          format: date-time
+          type: string
+        expire_at:
+          format: date-time
           type: string
       type: object
   securitySchemes:

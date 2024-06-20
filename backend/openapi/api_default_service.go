@@ -60,46 +60,90 @@ func (s *DefaultAPIService) HealthGet(ctx context.Context) (ImplResponse, error)
 	return Response(http.StatusNotImplemented, nil), errors.New("HealthGet method not implemented")
 }
 
-// UsersLoginPost - User login
-func (s *DefaultAPIService) UsersLoginPost(ctx context.Context, userLogin UserLogin) (ImplResponse, error) {
-	// TODO - update UsersLoginPost with the required logic for this service method.
+// UserLoginPost - User login
+func (s *DefaultAPIService) UserLoginPost(ctx context.Context, userLogin UserLogin) (ImplResponse, error) {
+	// TODO - update UserLoginPost with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
 	// TODO: Uncomment the next line to return response Response(200, LoginResponse{}) or use other options such as http.Ok ...
 	// return Response(200, LoginResponse{}), nil
 
-	return Response(http.StatusNotImplemented, nil), errors.New("UsersLoginPost method not implemented")
+	return Response(http.StatusNotImplemented, nil), errors.New("UserLoginPost method not implemented")
 }
 
-// UsersMeGet - Get user details
-func (s *DefaultAPIService) UsersMeGet(ctx context.Context) (ImplResponse, error) {
-	// TODO - update UsersMeGet with the required logic for this service method.
+// UserMeEmailCredentialGet - Get user email credential
+func (s *DefaultAPIService) UserMeEmailCredentialGet(ctx context.Context) (ImplResponse, error) {
+	// TODO - update UserMeEmailCredentialGet with the required logic for this service method.
+	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, EmailCredential{}) or use other options such as http.Ok ...
+	// return Response(200, EmailCredential{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("UserMeEmailCredentialGet method not implemented")
+}
+
+// UserMeEmailCredentialPut - Store user email credential with encrypted data
+func (s *DefaultAPIService) UserMeEmailCredentialPut(ctx context.Context, putEmailCredentialRequest PutEmailCredentialRequest) (ImplResponse, error) {
+	// TODO - update UserMeEmailCredentialPut with the required logic for this service method.
+	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(201, {}) or use other options such as http.Ok ...
+	// return Response(201, nil),nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("UserMeEmailCredentialPut method not implemented")
+}
+
+// UserMeGet - Get user details
+func (s *DefaultAPIService) UserMeGet(ctx context.Context) (ImplResponse, error) {
+	// TODO - update UserMeGet with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
 	// TODO: Uncomment the next line to return response Response(200, User{}) or use other options such as http.Ok ...
 	// return Response(200, User{}), nil
 
-	return Response(http.StatusNotImplemented, nil), errors.New("UsersMeGet method not implemented")
+	return Response(http.StatusNotImplemented, nil), errors.New("UserMeGet method not implemented")
 }
 
-// UsersRequestVerificationCodePost - Request an email verification code
-func (s *DefaultAPIService) UsersRequestVerificationCodePost(ctx context.Context, userEmailVerificationRequest UserEmailVerificationRequest) (ImplResponse, error) {
-	// TODO - update UsersRequestVerificationCodePost with the required logic for this service method.
+// UserMeRequestEmailCredentialPost - Generate a new email credential
+func (s *DefaultAPIService) UserMeRequestEmailCredentialPost(ctx context.Context) (ImplResponse, error) {
+	// TODO - update UserMeRequestEmailCredentialPost with the required logic for this service method.
+	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(201, UnencryptedEmailCredential{}) or use other options such as http.Ok ...
+	// return Response(201, UnencryptedEmailCredential{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("UserMeRequestEmailCredentialPost method not implemented")
+}
+
+// UserMeTicketCredentialsGet - Get user ticket credentials
+func (s *DefaultAPIService) UserMeTicketCredentialsGet(ctx context.Context) (ImplResponse, error) {
+	// TODO - update UserMeTicketCredentialsGet with the required logic for this service method.
+	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
+
+	// TODO: Uncomment the next line to return response Response(200, []TicketCredential{}) or use other options such as http.Ok ...
+	// return Response(200, []TicketCredential{}), nil
+
+	return Response(http.StatusNotImplemented, nil), errors.New("UserMeTicketCredentialsGet method not implemented")
+}
+
+// UserRequestVerificationCodePost - Request an email verification code
+func (s *DefaultAPIService) UserRequestVerificationCodePost(ctx context.Context, userEmailVerificationRequest UserEmailVerificationRequest) (ImplResponse, error) {
+	// TODO - update UserRequestVerificationCodePost with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
 	// TODO: Uncomment the next line to return response Response(200, {}) or use other options such as http.Ok ...
 	// return Response(200, nil),nil
 
-	return Response(http.StatusNotImplemented, nil), errors.New("UsersRequestVerificationCodePost method not implemented")
+	return Response(http.StatusNotImplemented, nil), errors.New("UserRequestVerificationCodePost method not implemented")
 }
 
-// UsersUpdatePut - Update user details
-func (s *DefaultAPIService) UsersUpdatePut(ctx context.Context, userUpdate UserUpdate) (ImplResponse, error) {
-	// TODO - update UsersUpdatePut with the required logic for this service method.
+// UserUpdatePut - Update user details
+func (s *DefaultAPIService) UserUpdatePut(ctx context.Context, userUpdate UserUpdate) (ImplResponse, error) {
+	// TODO - update UserUpdatePut with the required logic for this service method.
 	// Add api_default_service.go to the .openapi-generator-ignore to avoid overwriting this service implementation when updating open api generation.
 
 	// TODO: Uncomment the next line to return response Response(200, User{}) or use other options such as http.Ok ...
 	// return Response(200, User{}), nil
 
-	return Response(http.StatusNotImplemented, nil), errors.New("UsersUpdatePut method not implemented")
+	return Response(http.StatusNotImplemented, nil), errors.New("UserUpdatePut method not implemented")
 }
