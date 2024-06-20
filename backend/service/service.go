@@ -20,6 +20,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+const emailSigninCodeCacheDurationSec = 60
+
 type APIService struct {
 	dbClient    *repos.Client
 	redisClient redis.UniversalClient
@@ -67,13 +69,34 @@ func (s *APIService) HealthGet(ctx context.Context) (openapi.ImplResponse, error
 func (s *APIService) UserLoginPost(ctx context.Context, userLogin openapi.UserLogin) (openapi.ImplResponse, error) {
 	logger := log.Ctx(ctx).With().Str("op", "UsersLoginPost").Logger()
 
-	// TODO: handle user login code - now it's useful to test the API
+	// validate email
 	email, err := mail.ParseAddress(userLogin.Email)
 	if err != nil {
 		return openapi.Response(http.StatusBadRequest, "Invalid Email"), nil
 	}
 	logger = logger.With().Str("email", email.Address).Logger()
 
+	// validate code
+	code := userLogin.Code
+	if code == "" {
+		return openapi.Response(http.StatusBadRequest, "Invalid Code"), nil
+	}
+	key := util.GetUserEmailSigninCodeCacheKey(email.Address)
+	cachedCode, err := s.redisClient.GetDel(ctx, key).Result()
+	if err != nil {
+		if err == redis.Nil {
+			logger.Info().Msg("Code not found in cache. Invalid login attempt")
+			return openapi.Response(http.StatusUnauthorized, "Invalid Code"), nil
+		}
+		logger.Err(err).Msg("Failed to get cached sign in code")
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+	if code != cachedCode {
+		logger.Info().Msg("Invalid code")
+		return openapi.Response(http.StatusUnauthorized, "Invalid Code"), nil
+	}
+
+	// code has been validated, get or create user
 	user, err := s.dbClient.Users.GetUserByEmail(ctx, email.Address)
 	if err != nil {
 		if err == pgx.ErrNoRows {
@@ -90,7 +113,7 @@ func (s *APIService) UserLoginPost(ctx context.Context, userLogin openapi.UserLo
 		}
 	}
 
-	// Generate JWT
+	// generate JWT
 	token, err := s.jwtService.GenerateJWT(user.ID, user.Email)
 	if err != nil {
 		logger.Err(err).Msg("Failed to generate JWT")
@@ -133,14 +156,12 @@ func (s *APIService) UserRequestVerificationCodePost(ctx context.Context, userEm
 	}
 	logger = logger.With().Str("email", email.Address).Logger()
 
-	// TODO: const
-	k := fmt.Sprintf("request_sign_in_code:%s", email.Address)
-
-	code, err := s.redisClient.Get(ctx, k).Result()
+	key := util.GetUserEmailSigninCodeCacheKey(email.Address)
+	code, err := s.redisClient.Get(ctx, key).Result()
 	if err == nil && code != "" {
 		// code already sent, cannot request again until it expires
 		logger.Info().Msg("Code already sent, cannot request again until it expires")
-		return openapi.Response(http.StatusTooManyRequests, "Code has already been sent. Please request a new code after 30 seconds."), nil
+		return openapi.Response(http.StatusTooManyRequests, fmt.Sprintf("Code has already been sent. Please request a new code after %d seconds.", emailSigninCodeCacheDurationSec)), nil
 	} else if err != redis.Nil {
 		// redis error
 		logger.Err(err).Msg("Failed to get cached sign in code")
@@ -155,7 +176,7 @@ func (s *APIService) UserRequestVerificationCodePost(ctx context.Context, userEm
 	}
 
 	// cache code
-	err = s.redisClient.SetNX(ctx, k, "1", 30*time.Second).Err()
+	err = s.redisClient.SetNX(ctx, key, code, emailSigninCodeCacheDurationSec*time.Second).Err()
 	if err != nil {
 		logger.Err(err).Msg("Failed to cache email sign in code")
 		return openapi.Response(http.StatusInternalServerError, nil), err
