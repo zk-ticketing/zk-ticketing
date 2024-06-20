@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/mail"
 	"time"
@@ -12,6 +13,7 @@ import (
 	"github.com/NFTGalaxy/zk-ticketing-server/repos/email_credentials"
 	"github.com/NFTGalaxy/zk-ticketing-server/repos/users"
 	"github.com/NFTGalaxy/zk-ticketing-server/util"
+	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -19,18 +21,21 @@ import (
 )
 
 type APIService struct {
-	dbClient   *repos.Client
-	jwtService *jwt.Service
+	dbClient    *repos.Client
+	redisClient redis.UniversalClient
+	jwtService  *jwt.Service
 }
 
 // NewAPIService creates a default api service
 func NewAPIService(
 	dbClient *repos.Client,
+	redisClient redis.UniversalClient,
 	jwtService *jwt.Service,
 ) *APIService {
 	return &APIService{
-		dbClient:   dbClient,
-		jwtService: jwtService,
+		dbClient:    dbClient,
+		redisClient: redisClient,
+		jwtService:  jwtService,
 	}
 }
 
@@ -128,10 +133,39 @@ func (s *APIService) UserRequestVerificationCodePost(ctx context.Context, userEm
 	}
 	logger = logger.With().Str("email", email.Address).Logger()
 
-	// TODO: rate limit email and source ip
+	// TODO: const
+	k := fmt.Sprintf("request_sign_in_code:%s", email.Address)
 
-	logger.Info().Msg("Requesting verification code")
-	// TODO: send email verification code
+	code, err := s.redisClient.Get(ctx, k).Result()
+	if err == nil && code != "" {
+		// code already sent, cannot request again until it expires
+		logger.Info().Msg("Code already sent, cannot request again until it expires")
+		return openapi.Response(http.StatusTooManyRequests, "Code has already been sent. Please request a new code after 30 seconds."), nil
+	} else if err != redis.Nil {
+		// redis error
+		logger.Err(err).Msg("Failed to get cached sign in code")
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+
+	// redis does not have code, generate new code
+	code, err = s.generateEmailSigninCode()
+	if err != nil {
+		logger.Err(err).Msg("Failed to generate email sign in code")
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+
+	// cache code
+	err = s.redisClient.SetNX(ctx, k, "1", 30*time.Second).Err()
+	if err != nil {
+		logger.Err(err).Msg("Failed to cache email sign in code")
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+
+	err = s.sendSigninCodeToEmail(ctx, email.Address, code)
+	if err != nil {
+		logger.Err(err).Msg("Failed to send email verification code")
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
 
 	return openapi.Response(http.StatusOK, nil), nil
 }
@@ -150,6 +184,7 @@ func (s *APIService) UserUpdatePut(ctx context.Context, userUpdate openapi.UserU
 	encryptedInternalNullifier := userUpdate.EncryptedInternalNullifier
 	identityCommitment := userUpdate.IdentityCommitment
 	// TODO: validate input
+	// TODO: encrypted fields is b64 - start with 0x
 
 	// get existing user info, fail update request if user already has these fields set
 	user, err := s.dbClient.Users.GetUserByID(ctx, userID)

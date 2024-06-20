@@ -8,6 +8,7 @@ import (
 	"github.com/NFTGalaxy/zk-ticketing-server/repos"
 	"github.com/NFTGalaxy/zk-ticketing-server/server"
 	"github.com/NFTGalaxy/zk-ticketing-server/service"
+	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/rs/zerolog"
@@ -21,6 +22,7 @@ type config struct {
 	PostgresPort     int    `default:"5432"`
 	PostgresUsername string `required:"true"`
 	PostgresPassword string `required:"true"`
+	RedisAddr        string `default:"redis-master:6379"`
 	JWTSecretKey     string `required:"true"`
 	JWTExpiresSec    int64  `required:"true"`
 }
@@ -43,11 +45,18 @@ func main() {
 	defer pool.Close()
 	dbClient := repos.NewClient(pool)
 
+	// connect to Redis
+	redisClient := redis.NewUniversalClient(&redis.UniversalOptions{Addrs: []string{cfg.RedisAddr}})
+
 	// initialize JWT service
 	jwtService := jwt.NewService(cfg.JWTSecretKey, cfg.JWTExpiresSec)
 
 	// initialize API service
-	apiService := service.NewAPIService(dbClient, jwtService)
+	apiService := service.NewAPIService(
+		dbClient,
+		redisClient,
+		jwtService,
+	)
 
 	// create server
 	server := server.New(dbClient, cfg.RestPort, apiService, jwtService)

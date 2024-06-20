@@ -17,3 +17,4 @@ manifests:
     - infra/k8s/frontend.yaml
     - infra/k8s/backend.yaml
     - infra/k8s/postgres.yaml
+    - infra/k8s/redis.yaml
