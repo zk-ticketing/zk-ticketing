@@ -67,7 +67,7 @@ Once the tunnel is running, you can access the application at:
 Port-forward postgres db:
 
 ```
-kubectl port-forward svc/postgres 5432:5432
+kubectl port-forward  -n app svc/postgres 5432:5432
 ```
 
 Once the tunnel is running, you can access db using any postgres client (e.g. pgAdmin, DBeaver, etc.) with the following credentials (for local development only:
@@ -82,7 +82,7 @@ Once the tunnel is running, you can access db using any postgres client (e.g. pg
 In a new terminal, run the following command:
 
 ```
-start-swagger-ui
+make start-swagger-ui
 ```
 
 Then open the Swagger UI at http://localhost:8081 to test the API against our forwarded backend port.

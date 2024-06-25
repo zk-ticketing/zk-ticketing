@@ -2,6 +2,12 @@
 
 Terraform state data is stored in a remote gcs bucket. The bucket is versioned and encrypted. Bucket name is terraform-zk-ticketing.
 
+## Components
+
+### GKE
+
+Main application is deployed on GKE.
+
 ## Setup
 
 Create file terraform.tfvars to provide values for the variables in main.tf. The file should look like this:

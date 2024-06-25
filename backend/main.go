@@ -17,7 +17,7 @@ import (
 
 type config struct {
 	RestPort         int    `default:"3000"`
-	PostgresHost     string `default:"postgres.default.svc.cluster.local"` // TODO: namespace
+	PostgresHost     string `default:"postgres.app.svc.cluster.local"`
 	PostgresDatabase string `default:"db"`
 	PostgresPort     int    `default:"5432"`
 	PostgresUsername string `required:"true"`

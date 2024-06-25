@@ -18,32 +18,28 @@ data:
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: postgres
-  labels:
-    type: local
+  name: postgres-pv
 spec:
-  storageClassName: manual
   capacity:
-    storage: 1Gi
+    storage: 500Mi
   accessModes:
     - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: standard
   hostPath:
-    path: /mnt1/postgres-data
+    path: /var/data
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres
-  labels:
-    type: local
 spec:
-  storageClassName: manual
+  storageClassName: standard
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
       storage: 500Mi
-  volumeName: postgres
 ---
 apiVersion: apps/v1
 kind: StatefulSet
@@ -78,6 +74,7 @@ spec:
           volumeMounts:
             - name: postgres-volume
               mountPath: /var/lib/postgresql/data
+              subPath: postgres
           readinessProbe:
             exec:
               command:

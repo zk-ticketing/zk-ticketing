@@ -2,19 +2,29 @@ apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
   name: zk-ticketing-app
-build:
-  artifacts:
-    - image: frontend
-      context: frontend
-      docker:
-        dockerfile: Dockerfile
-    - image: backend
-      context: backend
-      docker:
-        dockerfile: Dockerfile
 manifests:
   rawYaml:
     - infra/k8s/frontend.yaml
     - infra/k8s/backend.yaml
     - infra/k8s/postgres.yaml
     - infra/k8s/redis.yaml
+build:
+  artifacts:
+    - image: oyyblin/zk-ticketing-frontend
+      context: frontend
+      docker:
+        dockerfile: Dockerfile
+    - image: oyyblin/zk-ticketing-backend
+      context: backend
+      docker:
+        dockerfile: Dockerfile
+deploy:
+  kubectl:
+    defaultNamespace: app
+profiles:
+  - name: local
+  - name: production
+    build:
+      local:
+        useBuildkit: false
+        push: true

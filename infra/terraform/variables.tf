@@ -26,7 +26,7 @@ variable "gke" {
   })
   default = {
     cluster_name       = "app"
-    machine_type       = "t2d-standard-1"
+    machine_type       = "t2d-standard-2"
     node_locations     = ["us-west1-a"]
     min_node_count     = 1
     max_node_count     = 4

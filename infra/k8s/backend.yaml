@@ -38,7 +38,7 @@ spec:
                 name: backend
             - secretRef:
                 name: backend
-          image: backend
+          image: oyyblin/zk-ticketing-backend
           ports:
             - containerPort: 3000
           resources:
