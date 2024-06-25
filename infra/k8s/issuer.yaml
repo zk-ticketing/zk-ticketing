@@ -1,0 +1,58 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: issuer
+data:
+  # Demo issuer - https://etherscan.io/tx/0xfbf58513352fe0dc899544b66013adbacb90437210e0008ceeb7b9c9ecec5bdd#eventlog
+  ISSUER_ID: "125344402375953606533377270523694284815265854046"
+---
+# TODO: manage secrets with a secret manager
+apiVersion: v1
+kind: Secret
+metadata:
+  name: issuer
+type: Opaque
+data:
+  # Demo issuer - 0x15f4a32c40152a0f48E61B7aed455702D1Ea725e
+  # echo 0xfd60ceb442aca7f74d2e56c1f0e93507798e8a6e02c4cd1a5585a36167fa7b03 | base64
+  ISSUER_PK: MHhmZDYwY2ViNDQyYWNhN2Y3NGQyZTU2YzFmMGU5MzUwNzc5OGU4YTZlMDJjNGNkMWE1NTg1YTM2MTY3ZmE3YjAzCg==
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: issuer
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: issuer
+  template:
+    metadata:
+      labels:
+        app: issuer
+    spec:
+      containers:
+        - name: issuer
+          envFrom:
+            - configMapRef:
+                name: issuer
+            - secretRef:
+                name: issuer
+          image: oyyblin/zk-ticketing-issuer
+          ports:
+            - containerPort: 9090
+          resources:
+            limits:
+              memory: "500Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: issuer
+spec:
+  type: NodePort
+  ports:
+    - port: 9090
+  selector:
+    app: issuer
