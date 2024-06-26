@@ -27,7 +27,6 @@ export async function GenerateSignedCredential(
   const attachments = req.attachments!.attachments;
 
   const cred = new credential.Credential(header, body);
-
   const sigMetadata = new credential.SignatureMetadata(
     credential.VerificationStackEnum.BabyZK,
     signatureID,

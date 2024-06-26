@@ -1,11 +1,11 @@
 package service
 
 import (
-	"github.com/NFTGalaxy/zk-ticketing-server/openapi"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/email_credentials"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/events"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/ticket_credentials"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/users"
+	"github.com/zk-ticketing/zk-ticketing/backend/openapi"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/email_credentials"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/events"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/ticket_credentials"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/users"
 )
 
 func MarshalEvent(event events.Event) openapi.Event {

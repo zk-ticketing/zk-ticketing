@@ -1,12 +1,12 @@
 package repos
 
 import (
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/email_credentials"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/events"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/registrations"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/ticket_credentials"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/users"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/email_credentials"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/events"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/registrations"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/ticket_credentials"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/users"
 )
 
 type Client struct {

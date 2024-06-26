@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/NFTGalaxy/zk-ticketing-server/jwt"
-	"github.com/NFTGalaxy/zk-ticketing-server/util"
+	"github.com/zk-ticketing/zk-ticketing/backend/jwt"
+	"github.com/zk-ticketing/zk-ticketing/backend/util"
 )
 
 // corsMiddleware sets the necessary headers for CORS

@@ -1,4 +1,4 @@
-import * as pb from "@/grpc/issuer/v1/issuer.js";
+import * as pb from "../grpc/issuer/v1/issuer.js";
 
 import { credential, claimValue, claimType } from "@galxe-identity-protocol/sdk";
 

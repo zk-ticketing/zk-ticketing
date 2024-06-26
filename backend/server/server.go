@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/NFTGalaxy/zk-ticketing-server/jwt"
-	"github.com/NFTGalaxy/zk-ticketing-server/openapi"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos"
-	"github.com/NFTGalaxy/zk-ticketing-server/service"
 	"github.com/rs/zerolog/log"
+	"github.com/zk-ticketing/zk-ticketing/backend/jwt"
+	"github.com/zk-ticketing/zk-ticketing/backend/openapi"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos"
+	"github.com/zk-ticketing/zk-ticketing/backend/service"
 )
 
 type Server struct {

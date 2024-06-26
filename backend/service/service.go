@@ -7,39 +7,55 @@ import (
 	"net/mail"
 	"time"
 
-	"github.com/NFTGalaxy/zk-ticketing-server/jwt"
-	"github.com/NFTGalaxy/zk-ticketing-server/openapi"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/email_credentials"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/registrations"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/ticket_credentials"
-	"github.com/NFTGalaxy/zk-ticketing-server/repos/users"
-	"github.com/NFTGalaxy/zk-ticketing-server/util"
 	"github.com/go-redis/redis/v8"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/rs/zerolog/log"
+	"github.com/zk-ticketing/zk-ticketing/backend/jwt"
+	"github.com/zk-ticketing/zk-ticketing/backend/openapi"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/email_credentials"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/registrations"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/ticket_credentials"
+	"github.com/zk-ticketing/zk-ticketing/backend/repos/users"
+	"github.com/zk-ticketing/zk-ticketing/backend/util"
+	"github.com/zk-ticketing/zk-ticketing/issuer/api/go/issuer/v1"
 )
 
-const emailSigninCodeCacheDurationSec = 60
+const (
+	emailSigninCodeCacheDurationSec = 60
+	unitCredentialTypeID            = 1
+)
 
 type APIService struct {
-	dbClient    *repos.Client
-	redisClient redis.UniversalClient
-	jwtService  *jwt.Service
+	emailCredentialContextID  int64
+	ticketCredentialContextID int64
+	issuerChainID             int64
+	dbClient                  *repos.Client
+	redisClient               redis.UniversalClient
+	jwtService                *jwt.Service
+	issuerClient              issuer.IssuerServiceClient
 }
 
 // NewAPIService creates a default api service
 func NewAPIService(
+	emailCredentialContextID int64,
+	ticketCredentialContextID int64,
+	issuerChainID int64,
 	dbClient *repos.Client,
 	redisClient redis.UniversalClient,
 	jwtService *jwt.Service,
+	issuerClient issuer.IssuerServiceClient,
 ) *APIService {
 	return &APIService{
-		dbClient:    dbClient,
-		redisClient: redisClient,
-		jwtService:  jwtService,
+		emailCredentialContextID:  emailCredentialContextID,
+		ticketCredentialContextID: ticketCredentialContextID,
+		issuerChainID:             issuerChainID,
+		dbClient:                  dbClient,
+		redisClient:               redisClient,
+		jwtService:                jwtService,
+		issuerClient:              issuerClient,
 	}
 }
 
@@ -94,14 +110,37 @@ func (s *APIService) EventsEventIdRequestTicketCredentialPost(ctx context.Contex
 	}
 
 	// found registration, create ticket credential
-	// TODO: issuer issue ticket credential
-	mockCredential := "mock-credential"
+	revocable := int64(0)
+	resp, err := s.issuerClient.GenerateSignedCredential(ctx, &issuer.GenerateSignedCredentialRequest{
+		Header: &issuer.Header{
+			Version: 1,
+			Type:    fmt.Sprintf("%d", unitCredentialTypeID),
+			Context: fmt.Sprintf("%d", s.ticketCredentialContextID),
+			Id:      util.StringToUint248Hash(userEmail).String(),
+		},
+		Body: &issuer.Body{
+			Tp: &issuer.CredType{
+				TypeId:    fmt.Sprintf("%d", unitCredentialTypeID),
+				Revocable: &revocable,
+			},
+		},
+		Attachments: &issuer.AttachmentSet{
+			Attachments: map[string]string{"event_id": eventId},
+		},
+		ChainId:            uint64(s.issuerChainID),
+		IdentityCommitment: "0",                                               // ticket credential is issued to the email
+		ExpiredAt:          fmt.Sprint(time.Now().Add(time.Hour * 24).Unix()), // TODO
+	})
+	if err != nil {
+		logger.Err(err).Msg("Failed to generate ticket credential")
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
 
 	logger.Info().Msg("Generated ticket credential")
 	return openapi.Response(http.StatusCreated, openapi.UnencryptedTicketCredential{
 		Id:         "mock-id",
 		EventId:    eventId,
-		Credential: mockCredential,
+		Credential: resp.GetSignedCred(),
 		IssuedAt:   time.Now(),
 		ExpireAt:   time.Now().Add(time.Hour * 24),
 	}), nil

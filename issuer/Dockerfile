@@ -1,5 +1,3 @@
-# Note: must call docker build in root directory
-
 # Use a Node.js base image
 FROM node:20-slim AS base
 RUN corepack enable
