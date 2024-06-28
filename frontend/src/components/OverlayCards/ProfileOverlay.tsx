@@ -1,12 +1,15 @@
-import React, { useEffect, useState, useCallback } from "react";
-import styled from "styled-components";
-import OverlayCard from "./OverlayCard";
-import { ProfileOverlayProps } from "@/types/profileOverlayProps";
-import { DefaultApi, Configuration, User } from "@/api";
+import React, { useEffect, useState, useCallback } from 'react';
+import styled from 'styled-components';
+import OverlayCard from './OverlayCard';
+import { ProfileOverlayProps } from '@/types/profileOverlayProps';
+import { DefaultApi, Configuration, User } from '@/api';
 import { useRouter } from 'next/router';
 import { getToken, removeToken } from '@/utils/auth';
 
-const ProfileOverlay: React.FC<ProfileOverlayProps> = ({ onClose, logoutButtonLabel }) => {
+const ProfileOverlay: React.FC<ProfileOverlayProps> = ({
+    onClose,
+    logoutButtonLabel,
+}) => {
     const [userDetails, setUserDetails] = useState<User | null>(null);
     const [showIdentitySecret, setShowIdentitySecret] = useState(false);
     const [showInternalNullifier, setShowInternalNullifier] = useState(false);
@@ -15,7 +18,7 @@ const ProfileOverlay: React.FC<ProfileOverlayProps> = ({ onClose, logoutButtonLa
 
     const handleLogout = useCallback(() => {
         removeToken();
-        localStorage.removeItem('auth_password'); 
+        localStorage.removeItem('auth_password');
         router.push('/');
     }, [router]);
 
@@ -25,14 +28,16 @@ const ProfileOverlay: React.FC<ProfileOverlayProps> = ({ onClose, logoutButtonLa
             if (token) {
                 try {
                     const config = new Configuration({
-                        accessToken: token
+                        accessToken: token,
                     });
                     const api = new DefaultApi(config);
                     const response = await api.userMeGet();
                     setUserDetails(response);
                 } catch (error) {
-                    console.error("Error fetching user details:", error);
-                    setMessage('Error fetching user details. Please try logging in again.');
+                    console.error('Error fetching user details:', error);
+                    setMessage(
+                        'Error fetching user details. Please try logging in again.',
+                    );
                     handleLogout();
                 }
             } else {
@@ -58,16 +63,24 @@ const ProfileOverlay: React.FC<ProfileOverlayProps> = ({ onClose, logoutButtonLa
                     </DetailItem>
                     <DetailItem>
                         <Label>Identity Commitment:</Label>
-                        <DetailContent>{userDetails.identityCommitment}</DetailContent>
+                        <DetailContent>
+                            {userDetails.identityCommitment}
+                        </DetailContent>
                     </DetailItem>
                     <DetailItem>
                         <Label>Identity Secret:</Label>
                         <SecretValue>
                             <SecretContent>
-                                {showIdentitySecret ? userDetails.encryptedIdentitySecret : "******"}
+                                {showIdentitySecret
+                                    ? userDetails.encryptedIdentitySecret
+                                    : '******'}
                             </SecretContent>
-                            <RevealButton onClick={() => setShowIdentitySecret(!showIdentitySecret)}>
-                                {showIdentitySecret ? "Hide" : "Show"}
+                            <RevealButton
+                                onClick={() =>
+                                    setShowIdentitySecret(!showIdentitySecret)
+                                }
+                            >
+                                {showIdentitySecret ? 'Hide' : 'Show'}
                             </RevealButton>
                         </SecretValue>
                     </DetailItem>
@@ -75,10 +88,18 @@ const ProfileOverlay: React.FC<ProfileOverlayProps> = ({ onClose, logoutButtonLa
                         <Label>Internal Nullifier:</Label>
                         <SecretValue>
                             <SecretContent>
-                                {showInternalNullifier ? userDetails.encryptedInternalNullifier : "******"}
+                                {showInternalNullifier
+                                    ? userDetails.encryptedInternalNullifier
+                                    : '******'}
                             </SecretContent>
-                            <RevealButton onClick={() => setShowInternalNullifier(!showInternalNullifier)}>
-                                {showInternalNullifier ? "Hide" : "Show"}
+                            <RevealButton
+                                onClick={() =>
+                                    setShowInternalNullifier(
+                                        !showInternalNullifier,
+                                    )
+                                }
+                            >
+                                {showInternalNullifier ? 'Hide' : 'Show'}
                             </RevealButton>
                         </SecretValue>
                     </DetailItem>
@@ -193,7 +214,9 @@ const DetailContent = styled.div`
 
 const Message = styled.p`
     color: #e63946;
-    font: 500 14px/150% "Inter", sans-serif;
+    font:
+        500 14px/150% 'Inter',
+        sans-serif;
     margin: 0;
 `;
 

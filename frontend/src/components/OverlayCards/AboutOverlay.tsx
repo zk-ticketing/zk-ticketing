@@ -1,20 +1,15 @@
-import React from "react";
-import styled from "styled-components";
-import OverlayCard from "./OverlayCard";
-import { AboutOverlayProps } from "@/types/aboutOverlayProps";
+import React from 'react';
+import styled from 'styled-components';
+import OverlayCard from './OverlayCard';
+import { AboutOverlayProps } from '@/types/aboutOverlayProps';
 
 const AboutOverlay: React.FC<AboutOverlayProps> = ({ onClose }) => {
     return (
-        <OverlayCard
-            title="About the Project"
-            onClose={onClose}
-        >
+        <OverlayCard title="About the Project" onClose={onClose}>
             <ContentContainer>
                 <ContentItem>
                     <Label>About:</Label>
-                    <Content>
-                        Explore our amazing project!
-                    </Content>
+                    <Content>Explore our amazing project!</Content>
                 </ContentItem>
             </ContentContainer>
         </OverlayCard>
@@ -22,10 +17,10 @@ const AboutOverlay: React.FC<AboutOverlayProps> = ({ onClose }) => {
 };
 
 const ContentContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
 `;
 
 const ContentItem = styled.div`

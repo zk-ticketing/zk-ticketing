@@ -11,7 +11,7 @@ const EventCard: React.FC<EventCardProps> = ({
     eventDescription,
     requestTicketCredentialsLabel,
     onClick,
-    onScanQRCode
+    onScanQRCode,
 }) => {
     const [isExpanded, setIsExpanded] = useState(false);
     const [isHostLoggedIn, setIsHostLoggedIn] = useState(false);
@@ -42,24 +42,30 @@ const EventCard: React.FC<EventCardProps> = ({
                 <DateAndArrow>
                     <EventDate>{eventDate}</EventDate>
                     <ArrowIcon>
-                        <Image 
-                            src="/down-arrow.svg" 
-                            alt="Expand" 
-                            width={16} 
-                            height={16} 
+                        <Image
+                            src="/down-arrow.svg"
+                            alt="Expand"
+                            width={16}
+                            height={16}
                             style={{
-                                transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                                transition: 'transform 0.3s ease'
+                                transform: isExpanded
+                                    ? 'rotate(180deg)'
+                                    : 'rotate(0deg)',
+                                transition: 'transform 0.3s ease',
                             }}
                         />
                     </ArrowIcon>
                 </DateAndArrow>
             </CardHeader>
             <CardBody $isExpanded={isExpanded}>
-                <EventUrl href={eventUrl} target="_blank">Event Link</EventUrl>
+                <EventUrl href={eventUrl} target="_blank">
+                    Event Link
+                </EventUrl>
                 <EventDescription>{eventDescription}</EventDescription>
                 <ButtonGroup>
-                    <RequestTicketCredentialsButton onClick={() => onClick(eventId)}>
+                    <RequestTicketCredentialsButton
+                        onClick={() => onClick(eventId)}
+                    >
                         {requestTicketCredentialsLabel}
                     </RequestTicketCredentialsButton>
                     <ScanQRCodeButton onClick={() => handleScanQRCode(eventId)}>
@@ -92,7 +98,7 @@ const Card = styled.div<{ $isExpanded: boolean }>`
     padding: 24px;
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
     transition: all 0.3s ease;
-    transform: ${props => props.$isExpanded ? 'scale(1.02)' : 'scale(1)'};
+    transform: ${(props) => (props.$isExpanded ? 'scale(1.02)' : 'scale(1)')};
     &:hover {
         box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
     }

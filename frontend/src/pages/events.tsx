@@ -6,29 +6,28 @@ import EventCard from '@/components/Events/EventCard';
 import { EventListProps } from '@/types/eventListProps';
 import withAuth from '@/components/withAuth';
 
-
 const dummyEvents: EventListProps[] = [
     {
         id: 'event1',
         title: 'Event 1',
         date: '2024-07-08',
         url: 'https://www.example.com',
-        description: 'This is a description for event 1.'
+        description: 'This is a description for event 1.',
     },
     {
         id: 'event2',
         title: 'Event 2',
         date: '2024-07-09',
         url: 'https://www.example.com',
-        description: 'This is a description for event 2.'
+        description: 'This is a description for event 2.',
     },
     {
         id: 'event3',
         title: 'Event 3',
         date: '2024-07-10',
         url: 'https://www.example.com',
-        description: 'This is a description for event 3.'
-    }
+        description: 'This is a description for event 3.',
+    },
 ];
 
 const EventsPage: React.FC = () => {
@@ -50,7 +49,12 @@ const EventsPage: React.FC = () => {
         <MainContainer>
             <Header>
                 <GoBackButton onClick={() => router.push('/dashboard')}>
-                    <Image src="/left-arrow.svg" alt="go back" width={20} height={20} />
+                    <Image
+                        src="/left-arrow.svg"
+                        alt="go back"
+                        width={20}
+                        height={20}
+                    />
                     <Title>Homepage</Title>
                 </GoBackButton>
             </Header>
@@ -74,19 +78,19 @@ const EventsPage: React.FC = () => {
 };
 
 const MainContainer = styled.div`
-  background-color: #060708;
-  display: flex;
-  flex-direction: column;
-  max-width: 480px;
-  min-height: 100vh;
-  margin: 0 auto;
-  padding: 15px;
+    background-color: #060708;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    min-height: 100vh;
+    margin: 0 auto;
+    padding: 15px;
 `;
 
 const Header = styled.header`
     display: flex;
     align-items: center;
-    background-color: #060708; 
+    background-color: #060708;
     justify-content: center;
 `;
 
@@ -97,8 +101,8 @@ const GoBackButton = styled.button`
     display: flex;
     align-items: center;
     color: #fff;
-    font-size: 16px;  
-    margin-right: 10px;  
+    font-size: 16px;
+    margin-right: 10px;
 `;
 
 const Title = styled.span`

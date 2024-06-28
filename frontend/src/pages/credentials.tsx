@@ -6,42 +6,52 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import withAuth from '@/components/withAuth';
 
-const dummyEmailCredential = "dummy-email-credential";
+const dummyEmailCredential = 'dummy-email-credential';
 const dummyTicketCredentials: any[] | (() => any[]) = [];
 
 const CredentialPage: React.FC = () => {
     const router = useRouter();
-    const [emailCredential, setEmailCredential] = useState(dummyEmailCredential);
-    const [ticketCredentials, setTicketCredentials] = useState(dummyTicketCredentials);
+    const [emailCredential, setEmailCredential] =
+        useState(dummyEmailCredential);
+    const [ticketCredentials, setTicketCredentials] = useState(
+        dummyTicketCredentials,
+    );
 
     const handleRetrieveEmailCredential = () => {
         console.log('Retrieve Email Credential');
-        setEmailCredential("new-dummy-email-credential");
+        setEmailCredential('new-dummy-email-credential');
     };
 
     const handleRetrieveTicketCredential = () => {
         console.log('Retrieve Ticket Credential');
         setTicketCredentials([
             ...ticketCredentials,
-            { event_id: "event3", credential: "dummy-ticket-credential-3" }
+            { event_id: 'event3', credential: 'dummy-ticket-credential-3' },
         ]);
     };
 
     return (
         <PageContainer>
             <MainContainer>
-            <Header>
-                <GoBackButton onClick={() => router.push('/dashboard')}>
-                    <Image src="/left-arrow.svg" alt="go back" width={20} height={20} />
-                    <Title>Homepage</Title>
-                </GoBackButton>
-            </Header>
+                <Header>
+                    <GoBackButton onClick={() => router.push('/dashboard')}>
+                        <Image
+                            src="/left-arrow.svg"
+                            alt="go back"
+                            width={20}
+                            height={20}
+                        />
+                        <Title>Homepage</Title>
+                    </GoBackButton>
+                </Header>
                 <CredentialSection>
                     <CredentialTitle>Email Credential</CredentialTitle>
                     {emailCredential ? (
                         <CredentialItem>{emailCredential}</CredentialItem>
                     ) : (
-                        <NoCredentialText>No email credential found.</NoCredentialText>
+                        <NoCredentialText>
+                            No email credential found.
+                        </NoCredentialText>
                     )}
                     {!emailCredential && (
                         <RetrieveButton onClick={handleRetrieveEmailCredential}>
@@ -54,17 +64,29 @@ const CredentialPage: React.FC = () => {
                     {ticketCredentials.length > 0 ? (
                         ticketCredentials.map((ticket, index) => (
                             <CredentialItem key={index}>
-                                Event ID: {ticket.event_id} - Credential: {ticket.credential}
-                                <GenerateProofButton onClick={() => console.log('Generate proof for:', ticket)}>
+                                Event ID: {ticket.event_id} - Credential:{' '}
+                                {ticket.credential}
+                                <GenerateProofButton
+                                    onClick={() =>
+                                        console.log(
+                                            'Generate proof for:',
+                                            ticket,
+                                        )
+                                    }
+                                >
                                     Generate Proof
                                 </GenerateProofButton>
                             </CredentialItem>
                         ))
                     ) : (
-                        <NoCredentialText>No ticket credentials found.</NoCredentialText>
+                        <NoCredentialText>
+                            No ticket credentials found.
+                        </NoCredentialText>
                     )}
                     {!ticketCredentials.length && (
-                        <RetrieveButton onClick={handleRetrieveTicketCredential}>
+                        <RetrieveButton
+                            onClick={handleRetrieveTicketCredential}
+                        >
                             Retrieve Ticket Credential
                         </RetrieveButton>
                     )}
@@ -89,7 +111,7 @@ const MainContainer = styled.div`
 const Header = styled.header`
     display: flex;
     align-items: center;
-    background-color: #060708; 
+    background-color: #060708;
     justify-content: center;
 `;
 
@@ -100,8 +122,8 @@ const GoBackButton = styled.button`
     display: flex;
     align-items: center;
     color: #fff;
-    font-size: 16px;  
-    margin-right: 10px;  
+    font-size: 16px;
+    margin-right: 10px;
 `;
 
 const Title = styled.span`

@@ -23,7 +23,7 @@ const ScanQRPage: React.FC = () => {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             const worker = new Worker(
-                new URL('../workers/qr-worker.ts', import.meta.url)
+                new URL('../workers/qr-worker.ts', import.meta.url),
             );
             setQrWorker(worker);
 
@@ -58,25 +58,43 @@ const ScanQRPage: React.FC = () => {
         if (webcamRef.current && canvasRef.current && qrWorker) {
             const video = webcamRef.current.video;
             const canvas = canvasRef.current;
-            const context = canvas.getContext('2d', { willReadFrequently: true });
+            const context = canvas.getContext('2d', {
+                willReadFrequently: true,
+            });
 
             if (video && video.readyState === 4 && context) {
                 setIsLoading(false);
                 const centerX = video.videoWidth / 2;
                 const centerY = video.videoHeight / 2;
-                const scanSize = Math.min(video.videoWidth, video.videoHeight) * 0.7;
+                const scanSize =
+                    Math.min(video.videoWidth, video.videoHeight) * 0.7;
                 const startX = centerX - scanSize / 2;
                 const startY = centerY - scanSize / 2;
 
                 canvas.width = scanSize;
                 canvas.height = scanSize;
-                context.drawImage(video, startX, startY, scanSize, scanSize, 0, 0, scanSize, scanSize);
-                const imageData = context.getImageData(0, 0, scanSize, scanSize);
-                
+                context.drawImage(
+                    video,
+                    startX,
+                    startY,
+                    scanSize,
+                    scanSize,
+                    0,
+                    0,
+                    scanSize,
+                    scanSize,
+                );
+                const imageData = context.getImageData(
+                    0,
+                    0,
+                    scanSize,
+                    scanSize,
+                );
+
                 qrWorker.postMessage({
                     data: imageData.data,
                     width: imageData.width,
-                    height: imageData.height
+                    height: imageData.height,
                 });
             }
         }
@@ -105,32 +123,39 @@ const ScanQRPage: React.FC = () => {
             <Card>
                 <Header>
                     <GoBackButton onClick={handleGoBack}>
-                        <Image src="/left-arrow.svg" alt="go back" width={20} height={20} />
+                        <Image
+                            src="/left-arrow.svg"
+                            alt="go back"
+                            width={20}
+                            height={20}
+                        />
                         <ButtonTitle>Events</ButtonTitle>
                     </GoBackButton>
                 </Header>
                 <Title>Scan QR Code</Title>
                 <ScannerContainer>
-                    {isLoading && <LoadingText>Initializing camera...</LoadingText>}
+                    {isLoading && (
+                        <LoadingText>Initializing camera...</LoadingText>
+                    )}
                     {isActive && (
                         <>
                             <Webcam
                                 ref={webcamRef}
                                 audio={false}
                                 screenshotFormat="image/jpeg"
-                                videoConstraints={{ 
+                                videoConstraints={{
                                     facingMode: 'environment',
                                     width: { ideal: 640 },
-                                    height: { ideal: 480 }
+                                    height: { ideal: 480 },
                                 }}
                                 onUserMedia={() => setIsLoading(false)}
                                 onUserMediaError={handleError}
-                                style={{ 
-                                    width: '100%', 
-                                    height: '300px', 
+                                style={{
+                                    width: '100%',
+                                    height: '300px',
                                     objectFit: 'cover',
                                     borderRadius: '12px',
-                                    display: isLoading ? 'none' : 'block'
+                                    display: isLoading ? 'none' : 'block',
                                 }}
                             />
                             <Canvas ref={canvasRef} />
@@ -151,7 +176,7 @@ const MainContainer = styled.div`
     align-items: center;
     min-height: 100vh;
     padding: 20px;
-    font-family: "Inter", sans-serif;
+    font-family: 'Inter', sans-serif;
 `;
 
 const Card = styled.div`
