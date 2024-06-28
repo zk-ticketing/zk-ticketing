@@ -1,4 +1,4 @@
-module github.com/zk-ticketing/zk-ticketing/backend
+module github.com/proof-pass/proof-pass/backend
 
 go 1.21.6
 
@@ -9,9 +9,9 @@ require (
 	github.com/gorilla/mux v1.8.1
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/proof-pass/proof-pass/issuer/api/go v0.0.0-20240628002537-1990e549bc2a
 	github.com/rs/zerolog v1.33.0
 	github.com/stretchr/testify v1.9.0
-	github.com/zk-ticketing/zk-ticketing/issuer/api/go v0.0.0-20240625231432-7eaaefa09a96
 	google.golang.org/grpc v1.64.0
 )
 

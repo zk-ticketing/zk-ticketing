@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/proof-pass/proof-pass/backend/jwt"
+	"github.com/proof-pass/proof-pass/backend/openapi"
+	"github.com/proof-pass/proof-pass/backend/repos"
+	"github.com/proof-pass/proof-pass/backend/service"
 	"github.com/rs/zerolog/log"
-	"github.com/zk-ticketing/zk-ticketing/backend/jwt"
-	"github.com/zk-ticketing/zk-ticketing/backend/openapi"
-	"github.com/zk-ticketing/zk-ticketing/backend/repos"
-	"github.com/zk-ticketing/zk-ticketing/backend/service"
 )
 
 type Server struct {

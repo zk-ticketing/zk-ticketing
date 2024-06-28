@@ -1,8 +1,8 @@
-# ZK Ticketing
+# Proof Pass
 
 ## Overview
 
-This is the monorepo for the ZK Ticketing system. This project aim to:
+This is the monorepo for the Proof Pass system. This project aim to:
 
 1. Bridge gap of email-based ticketing and ZK ticket verification.
 2. Allow users to check-in to events without revealing any personal information.
@@ -11,7 +11,7 @@ This is the monorepo for the ZK Ticketing system. This project aim to:
 
 ### Frontend
 
-The frontend is a Next.js application that provides the user interface for the ZK Ticketing system.
+The frontend is a Next.js application that provides the user interface for the Proof Pass system.
 
 ### Backend
 
@@ -19,7 +19,7 @@ The backend is a Go-based HTTP server that handles the server-side logic for the
 
 ### OpenAPI
 
-The openapi folder contains the OpenAPI specification for the ZK Ticketing system.
+The openapi folder contains the OpenAPI specification for the Proof Pass system.
 
 ### Infrastructure
 

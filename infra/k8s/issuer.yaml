@@ -38,7 +38,7 @@ spec:
                 name: issuer
             - secretRef:
                 name: issuer
-          image: oyyblin/zk-ticketing-issuer
+          image: oyyblin/proof-pass-issuer
           ports:
             - containerPort: 9090
           resources:

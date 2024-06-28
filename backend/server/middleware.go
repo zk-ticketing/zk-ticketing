@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/zk-ticketing/zk-ticketing/backend/jwt"
-	"github.com/zk-ticketing/zk-ticketing/backend/util"
+	"github.com/proof-pass/proof-pass/backend/jwt"
+	"github.com/proof-pass/proof-pass/backend/util"
 )
 
 // corsMiddleware sets the necessary headers for CORS

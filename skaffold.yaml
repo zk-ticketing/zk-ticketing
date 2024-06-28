@@ -1,7 +1,7 @@
 apiVersion: skaffold/v4beta11
 kind: Config
 metadata:
-  name: zk-ticketing-app
+  name: proof-pass-app
 manifests:
   rawYaml:
     - infra/k8s/frontend.yaml
@@ -11,15 +11,15 @@ manifests:
     - infra/k8s/redis.yaml
 build:
   artifacts:
-    - image: oyyblin/zk-ticketing-frontend
+    - image: oyyblin/proof-pass-frontend
       context: frontend
       docker:
         dockerfile: Dockerfile
-    - image: oyyblin/zk-ticketing-backend
+    - image: oyyblin/proof-pass-backend
       context: backend
       docker:
         dockerfile: Dockerfile
-    - image: oyyblin/zk-ticketing-issuer
+    - image: oyyblin/proof-pass-issuer
       context: issuer
       docker:
         dockerfile: Dockerfile

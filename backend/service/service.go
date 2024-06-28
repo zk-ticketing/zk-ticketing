@@ -11,16 +11,16 @@ import (
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/proof-pass/proof-pass/backend/jwt"
+	"github.com/proof-pass/proof-pass/backend/openapi"
+	"github.com/proof-pass/proof-pass/backend/repos"
+	"github.com/proof-pass/proof-pass/backend/repos/email_credentials"
+	"github.com/proof-pass/proof-pass/backend/repos/registrations"
+	"github.com/proof-pass/proof-pass/backend/repos/ticket_credentials"
+	"github.com/proof-pass/proof-pass/backend/repos/users"
+	"github.com/proof-pass/proof-pass/backend/util"
+	"github.com/proof-pass/proof-pass/issuer/api/go/issuer/v1"
 	"github.com/rs/zerolog/log"
-	"github.com/zk-ticketing/zk-ticketing/backend/jwt"
-	"github.com/zk-ticketing/zk-ticketing/backend/openapi"
-	"github.com/zk-ticketing/zk-ticketing/backend/repos"
-	"github.com/zk-ticketing/zk-ticketing/backend/repos/email_credentials"
-	"github.com/zk-ticketing/zk-ticketing/backend/repos/registrations"
-	"github.com/zk-ticketing/zk-ticketing/backend/repos/ticket_credentials"
-	"github.com/zk-ticketing/zk-ticketing/backend/repos/users"
-	"github.com/zk-ticketing/zk-ticketing/backend/util"
-	"github.com/zk-ticketing/zk-ticketing/issuer/api/go/issuer/v1"
 )
 
 const (
@@ -421,13 +421,53 @@ func (s *APIService) UserMeRequestEmailCredentialPost(ctx context.Context) (open
 	}
 	logger = logger.With().Str("email", userEmail).Str("uid", userID).Logger()
 
-	// TODO: issuer issue email credential
-	mockCredential := "mock-credential"
+	// get user identity commitment
+	user, err := s.dbClient.Users.GetUserByID(ctx, userID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			logger.Err(err).Msg("User not found")
+			return openapi.Response(http.StatusNotFound, nil), nil
+		}
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+	if user.IdentityCommitment == "" {
+		errMsg := "User identity commitment not set, cannot request email credential"
+		logger.Info().Msg(errMsg)
+		return openapi.Response(http.StatusBadRequest, errMsg), nil
+	}
+	identityCommitment := user.IdentityCommitment
+
+	// issue email credential
+	revocable := int64(0)
+	resp, err := s.issuerClient.GenerateSignedCredential(ctx, &issuer.GenerateSignedCredentialRequest{
+		Header: &issuer.Header{
+			Version: 1,
+			Type:    fmt.Sprintf("%d", unitCredentialTypeID),
+			Context: fmt.Sprintf("%d", s.emailCredentialContextID),
+			Id:      util.StringToUint248Hash(userEmail).String(),
+		},
+		Body: &issuer.Body{
+			Tp: &issuer.CredType{
+				TypeId:    fmt.Sprintf("%d", unitCredentialTypeID),
+				Revocable: &revocable,
+			},
+		},
+		Attachments: &issuer.AttachmentSet{
+			Attachments: map[string]string{"email": userEmail},
+		},
+		ChainId:            uint64(s.issuerChainID),
+		IdentityCommitment: identityCommitment,
+		ExpiredAt:          fmt.Sprint(time.Now().Add(time.Hour * 24).Unix()), // TODO
+	})
+	if err != nil {
+		logger.Err(err).Msg("Failed to generate email credential")
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
 
 	logger.Info().Msg("Generated email credential")
 	return openapi.Response(http.StatusCreated, openapi.UnencryptedEmailCredential{
 		Id:         "mock-id",
-		Credential: mockCredential,
+		Credential: resp.GetSignedCred(),
 		IssuedAt:   time.Now(),
 		ExpireAt:   time.Now().Add(time.Hour * 24),
 	}), nil

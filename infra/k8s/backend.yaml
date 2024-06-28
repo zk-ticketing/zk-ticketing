@@ -5,7 +5,7 @@ metadata:
 data:
   BACKEND_RESTPORT: "3000"
   BACKEND_POSTGRESUSERNAME: "postgres"
-  BACKEND_JWTEXPIRESSEC: "3600"
+  BACKEND_JWTEXPIRESSEC: "36000"
 ---
 # TODO: manage secrets with a secret manager
 apiVersion: v1
@@ -38,7 +38,7 @@ spec:
                 name: backend
             - secretRef:
                 name: backend
-          image: oyyblin/zk-ticketing-backend
+          image: oyyblin/proof-pass-backend
           ports:
             - containerPort: 3000
           resources:

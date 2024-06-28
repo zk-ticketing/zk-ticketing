@@ -1,12 +1,12 @@
 terraform {
   backend "gcs" {
-    bucket = "terraform-zk-ticketing"
+    bucket = "terraform-proof-pass"
     prefix = "terraform/"
   }
 }
 
 locals {
-  project_name = "ZK Ticketing"
+  project_name = "Proof Pass"
   project_id   = "zk-ticketing"
 
   enable_services = [

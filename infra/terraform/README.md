@@ -1,6 +1,6 @@
 # Terraform
 
-Terraform state data is stored in a remote gcs bucket. The bucket is versioned and encrypted. Bucket name is terraform-zk-ticketing.
+Terraform state data is stored in a remote gcs bucket. The bucket is versioned and encrypted. Bucket name is terraform-proof-pass.
 
 ## Components
 

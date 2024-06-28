@@ -7,13 +7,13 @@ import (
 	"github.com/go-redis/redis/v8"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/proof-pass/proof-pass/backend/jwt"
+	"github.com/proof-pass/proof-pass/backend/repos"
+	"github.com/proof-pass/proof-pass/backend/server"
+	"github.com/proof-pass/proof-pass/backend/service"
+	"github.com/proof-pass/proof-pass/issuer/api/go/issuer/v1"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-	"github.com/zk-ticketing/zk-ticketing/backend/jwt"
-	"github.com/zk-ticketing/zk-ticketing/backend/repos"
-	"github.com/zk-ticketing/zk-ticketing/backend/server"
-	"github.com/zk-ticketing/zk-ticketing/backend/service"
-	"github.com/zk-ticketing/zk-ticketing/issuer/api/go/issuer/v1"
 	"google.golang.org/grpc"
 )
 

@@ -1,11 +1,11 @@
 package service
 
 import (
-	"github.com/zk-ticketing/zk-ticketing/backend/openapi"
-	"github.com/zk-ticketing/zk-ticketing/backend/repos/email_credentials"
-	"github.com/zk-ticketing/zk-ticketing/backend/repos/events"
-	"github.com/zk-ticketing/zk-ticketing/backend/repos/ticket_credentials"
-	"github.com/zk-ticketing/zk-ticketing/backend/repos/users"
+	"github.com/proof-pass/proof-pass/backend/openapi"
+	"github.com/proof-pass/proof-pass/backend/repos/email_credentials"
+	"github.com/proof-pass/proof-pass/backend/repos/events"
+	"github.com/proof-pass/proof-pass/backend/repos/ticket_credentials"
+	"github.com/proof-pass/proof-pass/backend/repos/users"
 )
 
 func MarshalEvent(event events.Event) openapi.Event {

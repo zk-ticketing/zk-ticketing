@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: frontend
-          image: oyyblin/zk-ticketing-frontend
+          image: oyyblin/proof-pass-frontend
           ports:
             - containerPort: 8080
           resources:
