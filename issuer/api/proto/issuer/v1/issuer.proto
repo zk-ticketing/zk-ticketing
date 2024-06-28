@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package issuer.v1;
 
-option go_package = "github.com/zk-ticketing/zk-ticketing/issuer/api/go;issuer";
+option go_package = "github.com/proof-pass/proof-pass/issuer/api/go;issuer";
 
 message PingRequest {}
 message PingResponse {}

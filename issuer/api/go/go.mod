@@ -1,4 +1,4 @@
-module github.com/zk-ticketing/zk-ticketing/issuer/api/go
+module github.com/proof-pass/proof-pass/issuer/api/go
 
 go 1.21.6
 

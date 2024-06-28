@@ -1,7 +1,7 @@
 {
-  "name": "@zk-ticketing/issuer",
+  "name": "@proof-pass/issuer",
   "version": "0.0.1",
-  "description": "ZK Ticketing Issuer Service",
+  "description": "Proof Pass Issuer Service",
   "engines": {
     "node": ">=18.0.0"
   },
