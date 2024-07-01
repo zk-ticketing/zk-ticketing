@@ -1,0 +1,98 @@
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: Gateway
+metadata:
+  name: api
+  namespace: app
+  annotations:
+    networking.gke.io/certmap: app-certmap
+spec:
+  gatewayClassName: gke-l7-global-external-managed
+  addresses:
+    - type: NamedAddress
+      value: api
+  listeners:
+    - name: http
+      protocol: HTTP
+      port: 80
+      allowedRoutes:
+        kinds:
+          - kind: HTTPRoute
+        namespaces:
+          from: All
+    - name: https
+      protocol: HTTPS
+      port: 443
+      allowedRoutes:
+        kinds:
+          - kind: HTTPRoute
+        namespaces:
+          from: All
+---
+# HTTP route -> reroute request to HTTPS
+kind: HTTPRoute
+apiVersion: gateway.networking.k8s.io/v1beta1
+metadata:
+  name: api-http-to-https-redirect
+  namespace: app
+spec:
+  parentRefs:
+    - name: api
+      namespace: app
+      sectionName: http
+  hostnames:
+    - api.proofpass.io
+  rules:
+    - filters:
+        - type: RequestRedirect
+          requestRedirect:
+            scheme: https
+---
+apiVersion: gateway.networking.k8s.io/v1beta1
+kind: HTTPRoute
+metadata:
+  name: api
+  namespace: app
+spec:
+  parentRefs:
+    - name: api
+      namespace: app
+      sectionName: https
+  hostnames:
+    - api.proofpass.io
+  rules:
+    - matches:
+        - path:
+            value: /
+      backendRefs:
+        - name: backend
+          namespace: app
+          kind: Service
+          port: 3000
+---
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+  name: api
+  namespace: app
+spec:
+  targetRef:
+    group: ""
+    kind: Service
+    name: backend
+---
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: api
+  namespace: app
+spec:
+  default:
+    config:
+      type: HTTP
+      httpHealthCheck:
+        port: 3000
+        requestPath: /v1/health
+  targetRef:
+    group: ""
+    kind: Service
+    name: backend

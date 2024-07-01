@@ -53,67 +53,67 @@ func (c *DefaultAPIController) Routes() Routes {
 	return Routes{
 		"EventsEventIdGet": Route{
 			strings.ToUpper("Get"),
-			"/api/v1/events/{eventId}",
+			"/v1/events/{eventId}",
 			c.EventsEventIdGet,
 		},
 		"EventsEventIdRequestTicketCredentialPost": Route{
 			strings.ToUpper("Post"),
-			"/api/v1/events/{eventId}/request-ticket-credential",
+			"/v1/events/{eventId}/request-ticket-credential",
 			c.EventsEventIdRequestTicketCredentialPost,
 		},
 		"EventsGet": Route{
 			strings.ToUpper("Get"),
-			"/api/v1/events",
+			"/v1/events",
 			c.EventsGet,
 		},
 		"HealthGet": Route{
 			strings.ToUpper("Get"),
-			"/api/v1/health",
+			"/v1/health",
 			c.HealthGet,
 		},
 		"UserLoginPost": Route{
 			strings.ToUpper("Post"),
-			"/api/v1/user/login",
+			"/v1/user/login",
 			c.UserLoginPost,
 		},
 		"UserMeEmailCredentialGet": Route{
 			strings.ToUpper("Get"),
-			"/api/v1/user/me/email-credential",
+			"/v1/user/me/email-credential",
 			c.UserMeEmailCredentialGet,
 		},
 		"UserMeEmailCredentialPut": Route{
 			strings.ToUpper("Put"),
-			"/api/v1/user/me/email-credential",
+			"/v1/user/me/email-credential",
 			c.UserMeEmailCredentialPut,
 		},
 		"UserMeGet": Route{
 			strings.ToUpper("Get"),
-			"/api/v1/user/me",
+			"/v1/user/me",
 			c.UserMeGet,
 		},
 		"UserMeRequestEmailCredentialPost": Route{
 			strings.ToUpper("Post"),
-			"/api/v1/user/me/request-email-credential",
+			"/v1/user/me/request-email-credential",
 			c.UserMeRequestEmailCredentialPost,
 		},
 		"UserMeTicketCredentialPut": Route{
 			strings.ToUpper("Put"),
-			"/api/v1/user/me/ticket-credential",
+			"/v1/user/me/ticket-credential",
 			c.UserMeTicketCredentialPut,
 		},
 		"UserMeTicketCredentialsGet": Route{
 			strings.ToUpper("Get"),
-			"/api/v1/user/me/ticket-credentials",
+			"/v1/user/me/ticket-credentials",
 			c.UserMeTicketCredentialsGet,
 		},
 		"UserRequestVerificationCodePost": Route{
 			strings.ToUpper("Post"),
-			"/api/v1/user/request-verification-code",
+			"/v1/user/request-verification-code",
 			c.UserRequestVerificationCodePost,
 		},
 		"UserUpdatePut": Route{
 			strings.ToUpper("Put"),
-			"/api/v1/user/update",
+			"/v1/user/update",
 			c.UserUpdatePut,
 		},
 	}

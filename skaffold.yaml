@@ -9,6 +9,8 @@ manifests:
     - infra/k8s/issuer.yaml
     - infra/k8s/postgres.yaml
     - infra/k8s/redis.yaml
+    - infra/k8s/gateway_frontend.yaml
+    - infra/k8s/gateway_api.yaml
 build:
   artifacts:
     - image: oyyblin/proof-pass-frontend

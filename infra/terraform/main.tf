@@ -15,11 +15,14 @@ locals {
     "container.googleapis.com",
     "dns.googleapis.com",
     "run.googleapis.com",
-    "secretmanager.googleapis.com"
+    "secretmanager.googleapis.com",
+    "certificatemanager.googleapis.com"
   ]
 
   # VPC
   vpc_subnetwork_ip_cidr_range = "10.0.1.0/24"
+
+  domain = "proofpass.io"
 }
 
 provider "google" {

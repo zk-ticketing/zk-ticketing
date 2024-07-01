@@ -31,10 +31,10 @@ func corsMiddleware(h http.Handler) http.Handler {
 func authMiddleware(h http.Handler, jwtService *jwt.Service) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Skip authentication for health check and preflight requests
-		if r.URL.Path == "/api/v1/health" ||
-			r.URL.Path == "/api/v1/user/login" ||
-			r.URL.Path == "/api/v1/user/request-verification-code" ||
-			r.URL.Path == "/api/v1/events" ||
+		if r.URL.Path == "/v1/health" ||
+			r.URL.Path == "/v1/user/login" ||
+			r.URL.Path == "/v1/user/request-verification-code" ||
+			r.URL.Path == "/v1/events" ||
 			r.Method == http.MethodOptions {
 			h.ServeHTTP(w, r)
 			return

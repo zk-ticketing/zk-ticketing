@@ -7,6 +7,12 @@ This is the monorepo for the Proof Pass system. This project aim to:
 1. Bridge gap of email-based ticketing and ZK ticket verification.
 2. Allow users to check-in to events without revealing any personal information.
 
+## Galxe Identity Protocol
+
+The Proof Pass system is built on top of the Galxe Identity Protocol. Ticket are issued as
+[credentials](https://docs.galxe.com/identity/specification/credential-format) and the proof
+user generated are used as tickets at the event.
+
 ## Project Structure
 
 ### Frontend
