@@ -296,11 +296,8 @@ components:
       example:
         data: data
         expire_at: 2000-01-23T04:56:07.000+00:00
-        id: id
         issued_at: 2000-01-23T04:56:07.000+00:00
       properties:
-        id:
-          type: string
         data:
           type: string
         issued_at:
@@ -314,11 +311,8 @@ components:
       example:
         credential: credential
         expire_at: 2000-01-23T04:56:07.000+00:00
-        id: id
         issued_at: 2000-01-23T04:56:07.000+00:00
       properties:
-        id:
-          type: string
         credential:
           type: string
         issued_at:
@@ -357,11 +351,8 @@ components:
         event_id: event_id
         data: data
         expire_at: 2000-01-23T04:56:07.000+00:00
-        id: id
         issued_at: 2000-01-23T04:56:07.000+00:00
       properties:
-        id:
-          type: string
         event_id:
           type: string
         data:
@@ -378,11 +369,8 @@ components:
         event_id: event_id
         credential: credential
         expire_at: 2000-01-23T04:56:07.000+00:00
-        id: id
         issued_at: 2000-01-23T04:56:07.000+00:00
       properties:
-        id:
-          type: string
         event_id:
           type: string
         credential:

@@ -109,6 +109,22 @@ func (s *APIService) EventsEventIdRequestTicketCredentialPost(ctx context.Contex
 		return openapi.Response(http.StatusBadRequest, errMsg), nil
 	}
 
+	// get user from database
+	user, err := s.dbClient.Users.GetUserByID(ctx, userID)
+	if err != nil {
+		if err == pgx.ErrNoRows {
+			logger.Err(err).Msg("User not found")
+			return openapi.Response(http.StatusNotFound, nil), nil
+		}
+		return openapi.Response(http.StatusInternalServerError, nil), err
+	}
+
+	if user.IdentityCommitment == "" {
+		errMsg := "User identity commitment not set, cannot generate ticket credential"
+		logger.Info().Msg(errMsg)
+		return openapi.Response(http.StatusBadRequest, errMsg), nil
+	}
+
 	// found registration, create ticket credential
 	revocable := int64(0)
 	resp, err := s.issuerClient.GenerateSignedCredential(ctx, &issuer.GenerateSignedCredentialRequest{
@@ -128,7 +144,7 @@ func (s *APIService) EventsEventIdRequestTicketCredentialPost(ctx context.Contex
 			Attachments: map[string]string{"event_id": eventId},
 		},
 		ChainId:            uint64(s.issuerChainID),
-		IdentityCommitment: "0",                                               // ticket credential is issued to the email
+		IdentityCommitment: user.IdentityCommitment,                           // ticket credential is issued to the email
 		ExpiredAt:          fmt.Sprint(time.Now().Add(time.Hour * 24).Unix()), // TODO
 	})
 	if err != nil {
@@ -138,7 +154,6 @@ func (s *APIService) EventsEventIdRequestTicketCredentialPost(ctx context.Contex
 
 	logger.Info().Msg("Generated ticket credential")
 	return openapi.Response(http.StatusCreated, openapi.UnencryptedTicketCredential{
-		Id:         "mock-id",
 		EventId:    eventId,
 		Credential: resp.GetSignedCred(),
 		IssuedAt:   time.Now(),
@@ -398,7 +413,7 @@ func (s *APIService) UserMeEmailCredentialPut(ctx context.Context, putEmailCrede
 
 	// create email credential
 	emailCredential, err := s.dbClient.EmailCredentials.CreateOrUpdateOne(ctx, email_credentials.CreateOrUpdateOneParams{
-		ID:                 putEmailCredentialRequest.Id,
+		ID:                 uuid.NewString(),
 		IdentityCommitment: user.IdentityCommitment,
 		Data:               putEmailCredentialRequest.Data,
 		IssuedAt:           pgtype.Timestamptz{Time: putEmailCredentialRequest.IssuedAt, Valid: true},
@@ -466,7 +481,6 @@ func (s *APIService) UserMeRequestEmailCredentialPost(ctx context.Context) (open
 
 	logger.Info().Msg("Generated email credential")
 	return openapi.Response(http.StatusCreated, openapi.UnencryptedEmailCredential{
-		Id:         "mock-id",
 		Credential: resp.GetSignedCred(),
 		IssuedAt:   time.Now(),
 		ExpireAt:   time.Now().Add(time.Hour * 24),
@@ -485,7 +499,7 @@ func (s *APIService) UserMeTicketCredentialPut(ctx context.Context, putTicketCre
 
 	// create ticket credential
 	ticketCredential, err := s.dbClient.TicketCredentials.CreateOrUpdateOne(ctx, ticket_credentials.CreateOrUpdateOneParams{
-		ID:       putTicketCredentialRequest.Id,
+		ID:       uuid.NewString(),
 		Email:    userEmail,
 		EventID:  putTicketCredentialRequest.EventId,
 		Data:     putTicketCredentialRequest.Data,

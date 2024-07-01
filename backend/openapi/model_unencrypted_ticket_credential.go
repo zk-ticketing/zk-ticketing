@@ -19,8 +19,6 @@ import (
 
 type UnencryptedTicketCredential struct {
 
-	Id string `json:"id,omitempty"`
-
 	EventId string `json:"event_id,omitempty"`
 
 	Credential string `json:"credential,omitempty"`

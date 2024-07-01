@@ -19,8 +19,6 @@ import (
 
 type UnencryptedEmailCredential struct {
 
-	Id string `json:"id,omitempty"`
-
 	Credential string `json:"credential,omitempty"`
 
 	IssuedAt time.Time `json:"issued_at,omitempty"`

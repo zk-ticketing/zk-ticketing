@@ -265,8 +265,6 @@ components:
     PutEmailCredentialRequest:
       type: object
       properties:
-        id:
-          type: string
         data:
           type: string
         issued_at:
@@ -278,8 +276,6 @@ components:
     UnencryptedEmailCredential:
       type: object
       properties:
-        id:
-          type: string
         credential:
           type: string
         issued_at:
@@ -308,8 +304,6 @@ components:
     PutTicketCredentialRequest:
       type: object
       properties:
-        id:
-          type: string
         event_id:
           type: string
         data:
@@ -323,8 +317,6 @@ components:
     UnencryptedTicketCredential:
       type: object
       properties:
-        id:
-          type: string
         event_id:
           type: string
         credential:

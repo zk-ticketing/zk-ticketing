@@ -22,7 +22,8 @@ INSERT INTO ticket_credentials (
     )
 VALUES ($1, $2, $3, $4, $5, $6) ON CONFLICT (event_id, email) DO
 UPDATE
-SET data = $4,
+SET id = $1,
+    data = $4,
     issued_at = $5,
     expire_at = $6
 RETURNING id, email, event_id, data, issued_at, expire_at

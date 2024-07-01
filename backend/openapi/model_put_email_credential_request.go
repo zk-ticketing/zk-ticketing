@@ -19,8 +19,6 @@ import (
 
 type PutEmailCredentialRequest struct {
 
-	Id string `json:"id,omitempty"`
-
 	Data string `json:"data,omitempty"`
 
 	IssuedAt time.Time `json:"issued_at,omitempty"`

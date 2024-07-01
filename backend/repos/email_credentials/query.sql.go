@@ -21,7 +21,8 @@ INSERT INTO email_credentials (
     )
 VALUES ($1, $2, $3, $4, $5) ON CONFLICT (identity_commitment) DO
 UPDATE
-SET data = $3,
+SET id = $1,
+    data = $3,
     issued_at = $4,
     expire_at = $5
 RETURNING id, identity_commitment, data, issued_at, expire_at

@@ -19,8 +19,6 @@ import (
 
 type PutTicketCredentialRequest struct {
 
-	Id string `json:"id,omitempty"`
-
 	EventId string `json:"event_id,omitempty"`
 
 	Data string `json:"data,omitempty"`
