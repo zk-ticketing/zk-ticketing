@@ -1,49 +1,115 @@
-import React from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import Image from 'next/image';
 import styled from 'styled-components';
 import { useRouter } from 'next/router';
 import EventCard from '@/components/Events/EventCard';
-import { EventListProps } from '@/types/eventListProps';
 import withAuth from '@/components/withAuth';
-
-const dummyEvents: EventListProps[] = [
-    {
-        id: 'event1',
-        title: 'Event 1',
-        date: '2024-07-08',
-        url: 'https://www.example.com',
-        description: 'This is a description for event 1.',
-    },
-    {
-        id: 'event2',
-        title: 'Event 2',
-        date: '2024-07-09',
-        url: 'https://www.example.com',
-        description: 'This is a description for event 2.',
-    },
-    {
-        id: 'event3',
-        title: 'Event 3',
-        date: '2024-07-10',
-        url: 'https://www.example.com',
-        description: 'This is a description for event 3.',
-    },
-];
+import { DefaultApi, Event, Configuration, FetchAPI } from '@/api';
+import { getToken } from '@/utils/auth'; 
 
 const EventsPage: React.FC = () => {
     const router = useRouter();
+    const [eventList, setEventList] = useState<Event[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
-    const handleRequestTicketCredential = (eventId: string) => {
-        console.log('Request ticket credential for event:', eventId);
-        // Placeholder logic for requesting a ticket credential
-        // Future implementation will include API call to request ticket credential
-    };
+    // Memoize the API instance with the auth token
+    // to prevent re-creating the API instance on every render
 
-    const handleScanQRCode = (eventId: string) => {
+    const api = useMemo(() => {
+        const token = getToken();
+        
+        const customFetch: FetchAPI = async (input: RequestInfo, init?: RequestInit) => {
+            if (!init) {
+                init = {};
+            }
+            if (!init.headers) {
+                init.headers = {};
+            }
+            
+            if (token) {
+                (init.headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+            }
+            
+            return fetch(input, init);
+        };
+
+        const config = new Configuration({
+            accessToken: token,
+            fetchApi: customFetch
+        });
+
+        return new DefaultApi(config);
+    }, []);
+
+    const fetchEvents = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const response = await api.eventsGet();
+            setEventList(response);
+        } catch (error) {
+            console.error('Error fetching events:', error);
+            setError('Failed to fetch events. Please try again later.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [api]);
+
+    useEffect(() => {
+        fetchEvents();
+    }, [fetchEvents]);
+
+    const fetchEventDetails = useCallback(async (eventId: string) => {
+        try {
+            const response = await api.eventsEventIdGet({ eventId });
+            return response;
+        } catch (error) {
+            console.error('Error fetching event details:', error);
+            throw error;
+        }
+    }, [api]);
+
+    const handleRequestTicketCredential = useCallback(async (eventId: string) => {
+        try {
+            setIsLoading(true);
+            
+            // Step 1: Request the ticket credential
+            const ticketCredential = await api.eventsEventIdRequestTicketCredentialPost({
+                eventId: eventId
+            });
+            console.log('Ticket credential requested successfully:', ticketCredential);
+            
+            // Step 2: Store the ticket credential
+            if (ticketCredential) {
+                await api.userMeTicketCredentialPut({
+                    putTicketCredentialRequest: {
+                        id: ticketCredential.id ?? '',
+                        eventId: ticketCredential.eventId ?? '',
+                        data: ticketCredential.credential ?? '',
+                        issuedAt: ticketCredential.issuedAt ?? new Date(),
+                        expireAt: ticketCredential.expireAt ?? new Date(),
+                    }
+                });
+                console.log('Ticket credential stored successfully');
+            } else {
+                throw new Error('Failed to request ticket credential');
+            }
+            
+            // Refresh the event list
+            await fetchEvents();
+        } catch (error) {
+            console.error('Error requesting or storing ticket credential:', error);
+            setError('Failed to request or store ticket credential. Please try again later.');
+        } finally {
+            setIsLoading(false);
+        }
+    }, [api, fetchEvents]);
+
+    const handleScanQRCode = useCallback((eventId: string) => {
         console.log('Initiate QR Code Scan for event:', eventId);
-        // Navigate to the Scan QR page
         router.push(`/scan-qr?eventId=${eventId}`);
-    };
+    }, [router]);
 
     return (
         <MainContainer>
@@ -59,19 +125,28 @@ const EventsPage: React.FC = () => {
                 </GoBackButton>
             </Header>
             <EventList>
-                {dummyEvents.map((event, index) => (
-                    <EventCard
-                        key={index}
-                        eventId={event.id}
-                        eventName={event.title}
-                        eventDate={event.date}
-                        eventUrl={event.url}
-                        eventDescription={event.description}
-                        requestTicketCredentialsLabel="Request Credential"
-                        onClick={handleRequestTicketCredential}
-                        onScanQRCode={handleScanQRCode}
-                    />
-                ))}
+                {isLoading ? (
+                    <LoadingIndicator>Loading events...</LoadingIndicator>
+                ) : error ? (
+                    <ErrorMessage>{error}</ErrorMessage>
+                ) : eventList.length > 0 ? (
+                    eventList.map((event) => (
+                        <EventCard
+                            key={event.id ?? ''}
+                            eventId={event.id ?? ''}
+                            eventName={event.name ?? ''}
+                            eventDate={new Date().toLocaleDateString()} 
+                            eventUrl={event.url ?? ''}
+                            eventDescription={event.description ?? ''}
+                            requestTicketCredentialsLabel="Request Credential"
+                            onClick={handleRequestTicketCredential}
+                            onScanQRCode={handleScanQRCode}
+                            fetchEventDetails={fetchEventDetails}
+                        />
+                    ))
+                ) : (
+                    <NoEventsMessage>No events available.</NoEventsMessage>
+                )}
             </EventList>
         </MainContainer>
     );
@@ -118,6 +193,27 @@ const EventList = styled.div`
     flex-direction: column;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
     margin: 24px 0;
+`;
+
+const LoadingIndicator = styled.div`
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
+`;
+
+const ErrorMessage = styled.div`
+    color: #ff6b6b;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
+`;
+
+const NoEventsMessage = styled.div`
+    color: #fff;
+    font-size: 18px;
+    text-align: center;
+    padding: 20px;
 `;
 
 export default withAuth(EventsPage);

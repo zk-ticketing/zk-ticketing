@@ -1,3 +1,5 @@
+import { Event } from '@/api';
+
 export interface EventCardProps {
     eventId: string;
     eventName: string;
@@ -7,4 +9,5 @@ export interface EventCardProps {
     requestTicketCredentialsLabel: string;
     onClick: (eventId: string) => void;
     onScanQRCode: (eventId: string, adminCode?: string) => void;
+    fetchEventDetails: (eventId: string) => Promise<Event>;
 }
