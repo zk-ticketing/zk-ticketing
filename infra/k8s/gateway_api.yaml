@@ -62,7 +62,15 @@ spec:
   rules:
     - matches:
         - path:
-            value: /
+            value: /swagger-ui
+      backendRefs:
+        - name: swagger-ui
+          namespace: app
+          kind: Service
+          port: 8080
+    - matches:
+        - path:
+            value: /v1
       backendRefs:
         - name: backend
           namespace: app
@@ -96,3 +104,31 @@ spec:
     group: ""
     kind: Service
     name: backend
+---
+apiVersion: networking.gke.io/v1
+kind: GCPBackendPolicy
+metadata:
+  name: api-swagger-ui
+  namespace: app
+spec:
+  targetRef:
+    group: ""
+    kind: Service
+    name: swagger-ui
+---
+apiVersion: networking.gke.io/v1
+kind: HealthCheckPolicy
+metadata:
+  name: api-swagger-ui
+  namespace: app
+spec:
+  default:
+    config:
+      type: HTTP
+      httpHealthCheck:
+        port: 8080
+        requestPath: /swagger-ui/
+  targetRef:
+    group: ""
+    kind: Service
+    name: swagger-ui

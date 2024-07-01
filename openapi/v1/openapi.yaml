@@ -1,9 +1,14 @@
 openapi: 3.0.3
 info:
   title: Proof Pass API
-  version: 0.0.1
+  version: 0.1.0
+  license:
+    { name: Apache 2.0, url: https://www.apache.org/licenses/LICENSE-2.0.html }
 servers:
   - url: http://localhost:3000/v1
+    description: Localhost development server
+  - url: https://api.proofpass.io/v1
+    description: Production server
 paths:
   /health:
     get:
